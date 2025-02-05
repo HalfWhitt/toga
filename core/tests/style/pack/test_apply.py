@@ -118,3 +118,14 @@ def test_set_visibility_inherited():
     # Show grandparent again; the other two should reappear.
     grandparent.style.visibility = VISIBLE
     assert_hidden_called(False, False, False)
+
+
+def test_set_visibility_inherited_on_add():
+    """Nodes should be hidden when added to an already-hidden parent."""
+    print("Creating parent")
+    parent = ExampleParentNode("parent", style=Pack(visibility=HIDDEN))
+    print("Creating child")
+    child = ExampleNode("child", style=Pack())
+    print("Adding child")
+    parent.add(child)
+    child._impl.set_hidden.assert_called_once_with(True)

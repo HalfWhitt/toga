@@ -122,11 +122,10 @@ async def test_font_file_loaded(
         pytest.skip("Platform doesn't support loading custom fonts")
 
     # Update widget font family and other options if needed
-    widget.style.font_family = font_family
-    for prop, value in font_kwargs.items():
-        widget.style.update(
-            **{f"font_{kwarg}": value for kwarg, value in font_kwargs.items()}
-        )
+    widget.style |= {
+        "font_family": font_family,
+        **{f"font_{kwarg}": value for kwarg, value in font_kwargs.items()},
+    }
     await font_probe.redraw(f"Using {font_family} {' '.join(font_kwargs.values())}")
 
     # Check that font properties are updated
@@ -136,23 +135,11 @@ async def test_font_file_loaded(
     if not variable_font_test or font_probe.supports_custom_variable_fonts:
         font_probe.assert_font_options(**font_kwargs)
 
-    # Setting the font to "Roboto something" involves setting the font to
-    # "Roboto" as an intermediate step. However, we haven't registered "Roboto
-    # regular", so this will raise an warning about the missing "regular" font.
-    # Ignore this message.
-    stdout = capsys.readouterr().out
-    if font_kwargs:
-        stdout = stdout.replace(
-            f"Unknown font '{font_family} default size'; "
-            f"using system font as a fallback\n",
-            "",
-        )
-
-    assert "; using system font as a fallback" not in stdout
+    assert "; using system font as a fallback" not in capsys.readouterr().out
 
 
 async def test_non_existent_font_file(widget: toga.Label, app: toga.App):
-    "Invalid font files fail registration"
+    """Invalid font files fail registration."""
     Font.register(
         family="non-existent",
         path=app.paths.app / "resources/fonts/nonexistent.ttf",
@@ -168,7 +155,7 @@ async def test_corrupted_font_file(
     font_probe,
     app: toga.App,
 ):
-    "Corrupted font files fail registration"
+    """Corrupted font files fail registration."""
     if not font_probe.supports_custom_fonts:
         pytest.skip("Platform doesn't support registering and loading custom fonts")
 

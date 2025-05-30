@@ -226,12 +226,13 @@ Defines the natural direction of horizontal content.
 ``font_family``
 ---------------
 
-**Values:** ``system`` | ``serif`` | ``sans-serif`` | ``cursive`` | ``fantasy`` |
-``monospace`` | ``<string>``
+**Values:** ``<list>`` containing one or more of ``system`` | ``serif`` | ``sans-serif`` | ``cursive`` | ``fantasy`` | ``monospace`` | ``<string>``
 
 **Initial value:** ``system``
 
-The font family to be used.
+A list defining possible font families, in order of preference: the first item that maps
+to a valid font will be used. If the none can be resolved, the system font will be
+used.
 
 A value of ``system`` indicates that whatever is a system-appropriate font
 should be used.
@@ -241,7 +242,7 @@ use a system-defined font that matches the description (e.g. "Times New Roman" f
 ``serif``, "Courier New" for ``monospace``).
 
 Any other value will be checked against the family names previously registered with
-:any:`Font.register`. If the name cannot be resolved, the system font will be used.
+:any:`Font.register`.
 
 .. _pack-font-style:
 

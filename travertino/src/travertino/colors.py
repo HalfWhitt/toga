@@ -354,20 +354,11 @@ def color(value):
                     )
 
         elif re_match := re.match(
-            r"""^
-                (?P<class_name>
-                    (?: rgb | hsl ) a?
-                )
-                \( (?P<args> .* ) \)
-                $
-            """,
-            value,
-            re.VERBOSE,
+            r"( (?: rgb|hsl ) a? ) \( (.*) \)", value, re.VERBOSE
         ):
-            match (
-                re_match.group("class_name"),
-                [arg.strip() for arg in re_match.group("args").split(",")],
-            ):
+            color_type, args = re_match.groups()
+
+            match color_type, [arg.strip() for arg in args.split(",")]:
                 case "rgb", (r, g, b):
                     return rgb(int(r), int(g), int(b))
 

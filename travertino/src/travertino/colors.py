@@ -143,14 +143,10 @@ class rgba(Color):
     "A representation of an RGBA color."
 
     def __init__(self, r, g, b, a):
-        self._validate_rgb("red", r)
-        self._validate_rgb("green", g)
-        self._validate_rgb("blue", b)
-        self._validate_alpha(a)
-        self.r = r
-        self.g = g
-        self.b = b
-        self.a = a
+        self.r = self._validate_rgb("red", r)
+        self.g = self._validate_rgb("green", g)
+        self.b = self._validate_rgb("blue", b)
+        self.a = self._validate_alpha(self._normalize_hex("alpha", a, percent=True))
 
     @classmethod
     def _from_hex_strings(cls, r, g, b, a):
@@ -168,8 +164,29 @@ class rgba(Color):
         return f"rgba({self.r}, {self.g}, {self.b}, {self.a})"
 
     @classmethod
+    def _normalize_hex(cls, content_name: str, value: str | int, percent=False):
+        match value:
+            case int() | float():
+                return value
+            case str():
+                try:
+                    if percent:
+                        return int(value, 16) / 0xFF
+                    else:
+                        return int(value, 16)
+                except ValueError:
+                    pass
+
+        raise ValueError(
+            f"Value for {content_name} must be a number or a hexadecimal string, "
+            f"got: {value}"
+        )
+
+    @classmethod
     def _validate_rgb(cls, content_name, value):
+        value = cls._normalize_hex(content_name, value)
         cls._validate_between(content_name, value, 0, 255)
+        return value
 
     @property
     def rgba(self):
@@ -228,10 +245,6 @@ class rgb(rgba):
 
     def __init__(self, r, g, b):
         super().__init__(r, g, b, 1.0)
-
-    @classmethod
-    def _from_hex_strings(cls, r, g, b):
-        return super()._from_hex_strings(r, g, b, "FF")
 
     def __repr__(self):
         return f"rgb({self.r}, {self.g}, {self.b})"
@@ -338,20 +351,16 @@ def color(value):
         if value.startswith("#"):
             match list(value.removeprefix("#")):
                 case r, g, b:
-                    return rgb._from_hex_strings(f"{r}{r}", f"{g}{g}", f"{b}{b}")
+                    return rgb(f"{r}{r}", f"{g}{g}", f"{b}{b}")
 
                 case r, g, b, a:
-                    return rgba._from_hex_strings(
-                        f"{r}{r}", f"{g}{g}", f"{b}{b}", f"{a}{a}"
-                    )
+                    return rgba(f"{r}{r}", f"{g}{g}", f"{b}{b}", f"{a}{a}")
 
                 case r1, r2, g1, g2, b1, b2:
-                    return rgb._from_hex_strings(f"{r1}{r2}", f"{g1}{g2}", f"{b1}{b2}")
+                    return rgb(f"{r1}{r2}", f"{g1}{g2}", f"{b1}{b2}")
 
                 case r1, r2, g1, g2, b1, b2, a1, a2:
-                    return rgba._from_hex_strings(
-                        f"{r1}{r2}", f"{g1}{g2}", f"{b1}{b2}", f"{a1}{a2}"
-                    )
+                    return rgba(f"{r1}{r2}", f"{g1}{g2}", f"{b1}{b2}", f"{a1}{a2}")
 
         elif re_match := re.match(
             r"( (?: rgb|hsl ) a? ) \( (.*) \)", value, re.VERBOSE

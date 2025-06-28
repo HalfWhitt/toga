@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import re
+
 from .constants import *  # noqa: F403
 
 
@@ -150,6 +152,15 @@ class rgba(Color):
         self.b = b
         self.a = a
 
+    @classmethod
+    def _from_hex_strings(cls, r, g, b, a):
+        return rgba(
+            r=int(r, 16),
+            g=int(g, 16),
+            b=int(b, 16),
+            a=int(a, 16) / 0xFF,
+        )
+
     def __hash__(self):
         return hash(("RGBA-color", self.r, self.g, self.b, self.a))
 
@@ -217,6 +228,10 @@ class rgb(rgba):
 
     def __init__(self, r, g, b):
         super().__init__(r, g, b, 1.0)
+
+    @classmethod
+    def _from_hex_strings(cls, r, g, b):
+        return super()._from_hex_strings(r, g, b, "FF")
 
     def __repr__(self):
         return f"rgb({self.r}, {self.g}, {self.b})"
@@ -320,83 +335,60 @@ def color(value):
         return value
 
     elif isinstance(value, str):
-        if value[0] == "#":
-            if len(value) == 4:
-                return rgb(
-                    r=int(value[1] + value[1], 16),
-                    g=int(value[2] + value[2], 16),
-                    b=int(value[3] + value[3], 16),
-                )
-            elif len(value) == 5:
-                return rgba(
-                    r=int(value[1] + value[1], 16),
-                    g=int(value[2] + value[2], 16),
-                    b=int(value[3] + value[3], 16),
-                    a=int(value[4] + value[4], 16) / 0xFF,
-                )
-            elif len(value) == 7:
-                return rgb(
-                    r=int(value[1:3], 16),
-                    g=int(value[3:5], 16),
-                    b=int(value[5:7], 16),
-                )
-            elif len(value) == 9:
-                return rgba(
-                    r=int(value[1:3], 16),
-                    g=int(value[3:5], 16),
-                    b=int(value[5:7], 16),
-                    a=int(value[7:9], 16) / 0xFF,
-                )
-        elif value.startswith("rgba"):
-            try:
-                values = value[5:-1].split(",")
-                if len(values) == 4:
-                    return rgba(
-                        int(values[0]),
-                        int(values[1]),
-                        int(values[2]),
-                        float(
-                            values[3],
-                        ),
-                    )
-            except ValueError:
-                pass
-        elif value.startswith("rgb"):
-            try:
-                values = value[4:-1].split(",")
-                if len(values) == 3:
-                    return rgb(
-                        int(values[0]),
-                        int(values[1]),
-                        int(values[2]),
-                    )
-            except ValueError:
-                pass
+        if value.startswith("#"):
+            match list(value.removeprefix("#")):
+                case r, g, b:
+                    return rgb._from_hex_strings(f"{r}{r}", f"{g}{g}", f"{b}{b}")
 
-        elif value.startswith("hsla"):
-            try:
-                values = value[5:-1].split(",")
-                if len(values) == 4:
-                    return hsla(
-                        int(values[0]),
-                        int(values[1].strip().rstrip("%")) / 100.0,
-                        int(values[2].strip().rstrip("%")) / 100.0,
-                        float(values[3]),
+                case r, g, b, a:
+                    return rgba._from_hex_strings(
+                        f"{r}{r}", f"{g}{g}", f"{b}{b}", f"{a}{a}"
                     )
-            except ValueError:
-                pass
 
-        elif value.startswith("hsl"):
-            try:
-                values = value[4:-1].split(",")
-                if len(values) == 3:
+                case r1, r2, g1, g2, b1, b2:
+                    return rgb._from_hex_strings(f"{r1}{r2}", f"{g1}{g2}", f"{b1}{b2}")
+
+                case r1, r2, g1, g2, b1, b2, a1, a2:
+                    return rgba._from_hex_strings(
+                        f"{r1}{r2}", f"{g1}{g2}", f"{b1}{b2}", f"{a1}{a2}"
+                    )
+
+        elif re_match := re.match(
+            r"""^
+                (?P<class_name>
+                    (?: rgb | hsl ) a?
+                )
+                \( (?P<args> .* ) \)
+                $
+            """,
+            value,
+            re.VERBOSE,
+        ):
+            match (
+                re_match.group("class_name"),
+                [arg.strip() for arg in re_match.group("args").split(",")],
+            ):
+                case "rgb", (r, g, b):
+                    return rgb(int(r), int(g), int(b))
+
+                case "rgba", (r, g, b, a):
+                    return rgba(int(r), int(g), int(b), float(a))
+
+                case "hsl", (h, s, l) if s.endswith("%") and l.endswith("%"):
                     return hsl(
-                        int(values[0]),
-                        int(values[1].strip().rstrip("%")) / 100.0,
-                        int(values[2].strip().rstrip("%")) / 100.0,
+                        int(h),
+                        int(s.removesuffix("%")) / 100.0,
+                        int(l.removesuffix("%")) / 100.0,
                     )
-            except ValueError:
-                pass
+
+                case "hsla", (h, s, l, a) if s.endswith("%") and l.endswith("%"):
+                    return hsla(
+                        int(h),
+                        int(s.removesuffix("%")) / 100.0,
+                        int(l.removesuffix("%")) / 100.0,
+                        float(a),
+                    )
+
         else:
             try:
                 return NAMED_COLOR[value.lower()]

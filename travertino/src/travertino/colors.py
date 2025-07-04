@@ -351,47 +351,45 @@ def color(value):
         if result := NAMED_COLOR.get(value.lower()):
             return result
 
-        match RegexStr(value):
-            case r"# (\d a-f A-F){3–8}" as digits:
-                match digits:
-                    case r, g, b:
-                        return rgb(f"{r}{r}", f"{g}{g}", f"{b}{b}")
+        if re_match := re.fullmatch(r"# ( [\d a-f A-F] ){3–8}", value, re.VERBOSE):
+            match re_match.groups():
+                case r, g, b:
+                    return rgb(f"{r}{r}", f"{g}{g}", f"{b}{b}")
 
-                    case r, g, b, a:
-                        return rgba(f"{r}{r}", f"{g}{g}", f"{b}{b}", f"{a}{a}")
+                case r, g, b, a:
+                    return rgba(f"{r}{r}", f"{g}{g}", f"{b}{b}", f"{a}{a}")
 
-                    case r1, r2, g1, g2, b1, b2:
-                        return rgb(f"{r1}{r2}", f"{g1}{g2}", f"{b1}{b2}")
+                case r1, r2, g1, g2, b1, b2:
+                    return rgb(f"{r1}{r2}", f"{g1}{g2}", f"{b1}{b2}")
 
-                    case r1, r2, g1, g2, b1, b2, a1, a2:
-                        return rgba(f"{r1}{r2}", f"{g1}{g2}", f"{b1}{b2}", f"{a1}{a2}")
+                case r1, r2, g1, g2, b1, b2, a1, a2:
+                    return rgba(f"{r1}{r2}", f"{g1}{g2}", f"{b1}{b2}", f"{a1}{a2}")
 
-            case self._color_regex as name, *args:
-                match name, args:
-                    case "rgb", (r, g, b):
-                        return rgb(int(r), int(g), int(b))
+        elif re_match := re.fullmatch(
+            r"""
+                ( rgb | rgba | hsl | hsla )
+                \(\s*
+                    (?: (\S*?), \s* ){2-3} # two or three non-last arguments
+                    ( \S*? ),? # Comma after last argument is optional
+                \s*\)
+            """,
+            value,
+            re.VERBOSE,
+        ):
+            match re_match.groups():
+                case "rgb", r, g, b:
+                    return rgb(int(r), int(g), int(b))
 
-                    case "rgba", (r, g, b, a):
-                        return rgba(int(r), int(g), int(b), float(a))
+                case "rgba", r, g, b, a:
+                    return rgba(int(r), int(g), int(b), float(a))
 
-                    case "hsl", (h, s, l):
-                        return hsl(h, s, l)
+                case "hsl", h, s, l:
+                    return hsl(h, s, l)
 
-                    case "hsl", (h, s, l, a):
-                        return hsla(h, s, l, a)
+                case "hsl", h, s, l, a:
+                    return hsla(h, s, l, a)
 
         raise ValueError(f"Unknown color {value}")
-
-    @staticmethod()
-    @prpoerty
-    def _color_regex():
-        return r"""
-            ( rgb | rgba | hsl | hsla )
-            \(\s*
-                (?:(\S*?),\s*){1-2} # one or two arguments
-                (\S*?),? # Comma after last argument is optional
-            \s*\)
-            """
 
 
 NAMED_COLOR = {

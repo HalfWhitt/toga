@@ -15,8 +15,8 @@ class Color:
 
     def __eq__(self, other):
         try:
-            c1 = self.rgba
-            c2 = other.rgba
+            c1 = self.rgb
+            c2 = other.rgb
 
             return c1.r == c2.r and c1.g == c2.g and c1.b == c2.b and c1.a == c2.a
         except AttributeError:
@@ -39,8 +39,8 @@ class Color:
         # https://en.wikipedia.org/wiki/Alpha_compositing#Description
 
         # Convert the input colors to rgba in order to do the calculation.
-        front_color = self.rgba
-        back_color = back_color.rgba
+        front_color = self.rgb
+        back_color = back_color.rgb
 
         if front_color.a == 1:
             # If the front color is fully opaque then the result will be the same as
@@ -51,7 +51,7 @@ class Color:
 
         if blended_alpha == 0:
             # Don't further blend the color, to prevent divide by 0.
-            return rgba(0, 0, 0, 0)
+            return rgb(0, 0, 0, 0)
         else:
             bands = {}
             for band in "rgb":
@@ -62,7 +62,7 @@ class Color:
                     + (back * back_color.a * (1 - front_color.a))
                 ) / blended_alpha
 
-            return rgba(**bands, a=blended_alpha)
+            return rgb(**bands, a=blended_alpha)
 
     def unblend_over(self, back_color: Color, front_color_alpha: float) -> rgb:
         """Performs the reverse of the "over" straight alpha blending operation,
@@ -92,8 +92,8 @@ class Color:
         # are derived from the "over" straight alpha blending operation formula,
         # see: https://en.wikipedia.org/wiki/Alpha_compositing#Description
 
-        blended_color = self.rgba
-        back_color = back_color.rgba
+        blended_color = self.rgb
+        back_color = back_color.rgb
         if not 0 < front_color_alpha <= 1:
             raise ValueError(
                 "The value of front_color_alpha must be within the range of (0, 1]."
@@ -108,7 +108,7 @@ class Color:
                     - (back * back_color.a * (1 - front_color_alpha))
                 ) / front_color_alpha
 
-            return rgba(**bands, a=front_color_alpha)
+            return rgb(**bands, a=front_color_alpha)
 
 
 # f"{content_name} value should be between {min_value}-{max_value}. "

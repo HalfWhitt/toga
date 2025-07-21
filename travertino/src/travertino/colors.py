@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import re
+from itertools import pairwise
+
 from .constants import *  # noqa: F403
 
 
@@ -112,7 +115,7 @@ class Color:
 # f"Got {value}"
 
 
-class color_attribute:
+class _color_attribute:
     def __set_name__(self, color_class, name):
         self.name = name
 
@@ -123,12 +126,12 @@ class color_attribute:
         return getattr(color, f"_{self.name}")
 
 
-class rgb_band(color_attribute):
+class _rgb_band(_color_attribute):
     def validate(self, value):
         return _clamp(round(value), upper=255)
 
 
-class zero_to_one(color_attribute):
+class _zero_to_one(_color_attribute):
     def validate(self, value):
         return _clamp(float(value))
 
@@ -136,10 +139,10 @@ class zero_to_one(color_attribute):
 class rgb(Color):
     "A representation of an RGB(A) color."
 
-    r = rgb_band("red")
-    g = rgb_band("green")
-    b = rgb_band("blue")
-    a = zero_to_one("alpha")
+    r = _rgb_band("red")
+    g = _rgb_band("green")
+    b = _rgb_band("blue")
+    a = _zero_to_one("alpha")
 
     def __init__(self, r, g, b, a=1.0):
         self.r = r
@@ -199,7 +202,7 @@ class rgb(Color):
 rgba = rgb
 
 
-class hue(color_attribute):
+class _hue(_color_attribute):
     def validate(self, value):
         return int(value) % 360
 
@@ -207,10 +210,10 @@ class hue(color_attribute):
 class hsl(Color):
     "A representation of an HSL(A) color."
 
-    h = hue()
-    s = zero_to_one("saturation")
-    l = zero_to_one("lightness")  # noqa: E741
-    a = zero_to_one("alpha")
+    h = _hue()
+    s = _zero_to_one("saturation")
+    l = _zero_to_one("lightness")  # noqa: E741
+    a = _zero_to_one("alpha")
 
     def __init__(self, h, s, l, a=1.0):  # noqa: E741
         self.h = h
@@ -267,6 +270,13 @@ class hsl(Color):
 hsla = hsl
 
 
+def _parse_percentage(string):
+    if string.endswith("%"):
+        return int(string.removesuffix("%")) / 100
+    else:
+        return float(string)
+
+
 def color(value):
     """Parse a color from a value.
 
@@ -292,90 +302,56 @@ def color(value):
         return value
 
     elif isinstance(value, str):
-        if value[0] == "#":
-            if len(value) == 4:
-                return rgb(
-                    r=int(value[1] + value[1], 16),
-                    g=int(value[2] + value[2], 16),
-                    b=int(value[3] + value[3], 16),
-                )
-            elif len(value) == 5:
-                return rgba(
-                    r=int(value[1] + value[1], 16),
-                    g=int(value[2] + value[2], 16),
-                    b=int(value[3] + value[3], 16),
-                    a=int(value[4] + value[4], 16) / 0xFF,
-                )
-            elif len(value) == 7:
-                return rgb(
-                    r=int(value[1:3], 16),
-                    g=int(value[3:5], 16),
-                    b=int(value[5:7], 16),
-                )
-            elif len(value) == 9:
-                return rgba(
-                    r=int(value[1:3], 16),
-                    g=int(value[3:5], 16),
-                    b=int(value[5:7], 16),
-                    a=int(value[7:9], 16) / 0xFF,
-                )
-        elif value.startswith("rgba"):
-            try:
-                values = value[5:-1].split(",")
-                if len(values) == 4:
-                    return rgba(
-                        int(values[0]),
-                        int(values[1]),
-                        int(values[2]),
-                        float(
-                            values[3],
-                        ),
-                    )
-            except ValueError:
-                pass
-        elif value.startswith("rgb"):
-            try:
-                values = value[4:-1].split(",")
-                if len(values) == 3:
-                    return rgb(
-                        int(values[0]),
-                        int(values[1]),
-                        int(values[2]),
-                    )
-            except ValueError:
-                pass
+        if result := NAMED_COLOR.get(value.lower()):
+            return result
 
-        elif value.startswith("hsla"):
-            try:
-                values = value[5:-1].split(",")
-                if len(values) == 4:
-                    return hsla(
-                        int(values[0]),
-                        int(values[1].strip().rstrip("%")) / 100.0,
-                        int(values[2].strip().rstrip("%")) / 100.0,
-                        float(values[3]),
-                    )
-            except ValueError:
-                pass
+        if match := re.fullmatch(r"# ( [\d a-f A-F] ){3–8}", value, re.VERBOSE):
+            digits = match.groups()
 
-        elif value.startswith("hsl"):
-            try:
-                values = value[4:-1].split(",")
-                if len(values) == 3:
-                    return hsl(
-                        int(values[0]),
-                        int(values[1].strip().rstrip("%")) / 100.0,
-                        int(values[2].strip().rstrip("%")) / 100.0,
-                    )
-            except ValueError:
-                pass
-        else:
-            try:
-                return NAMED_COLOR[value.lower()]
-            except KeyError:
-                pass
+            if len(digits) in {3, 4}:
+                return rgb(*[f"{d}{d}" for d in digits])
 
-    raise ValueError(f"Unknown color {value}")
+            elif len(digits) in {6, 8}:
+                return rgb(*[f"{d1}{d2}" for d1, d2 in pairwise(digits)])
+
+        elif match := re.fullmatch(
+            r"""
+                ( rgb | hsl ) a?
+                \(\s*  # Open paren
+                (?:
+                    # Modern syntax
+                    (?:
+                        (?: (\S*?) \s* ){3}  # Three spaced-separated arguments
+                        (?: / \s* (\S*) )?  # Optional alpha
+                    )
+                    |
+                    # Legacy comma-separated syntax
+                    (?:
+                        (?: (\S*?), \s* ){2-3}  # two or three non-last arguments
+                        ( \S*? ),?  # Comma after last argument is optional
+                    )
+                )
+                \s*\)  # Close paren
+            """,
+            value,
+            re.VERBOSE,
+        ):
+            color_type, *args = match.groups()
+
+            if color_type == "rgb":
+                r, g, b, *a = args
+                a = _parse_percentage(a[0]) if a else 1.0
+                return rgb(int(r), int(g), int(b), a)
+
+            elif color_type == "hsl":
+                h, s, l, *a = args  # noqa: E741
+                h = int(h.removesuffix("deg"))
+                s = int(s.removesuffix("%"))
+                l = int(l.removesuffix("%"))  # noqa: E741
+                a = _parse_percentage(a[0]) if a else 1.0
+                return hsl(h, s, l, a)
+
+        raise ValueError(f"Unknown color {value}")
 
 
 NAMED_COLOR = {

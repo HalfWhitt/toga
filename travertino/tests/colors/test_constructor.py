@@ -4,10 +4,11 @@ from travertino.colors import hsl, hsla, rgb, rgba
 
 
 def assert_equal_color(actual, expected):
-    assert actual.rgba.r == expected.rgba.r
-    assert actual.rgba.g == expected.rgba.g
-    assert actual.rgba.b == expected.rgba.b
-    assert actual.rgba.a == expected.rgba.a
+    for band in ("r", "g", "b", "a"):
+        actual_band = getattr(actual.rgba, band)
+        expected_band = getattr(expected.rgba, band)
+        assert actual_band == expected_band
+        assert type(actual_band) is type(expected_band)
 
 
 @pytest.mark.parametrize(

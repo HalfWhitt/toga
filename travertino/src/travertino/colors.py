@@ -7,10 +7,6 @@ def _clamp(value, upper=1):
     return min(upper, max(0, value))
 
 
-def _clamp_hex(value):
-    return round(_clamp(value, upper=255))
-
-
 class Color:
     "A base class for all colorspace representations."
 
@@ -22,22 +18,6 @@ class Color:
             return c1.r == c2.r and c1.g == c2.g and c1.b == c2.b and c1.a == c2.a
         except AttributeError:
             return False
-
-    @classmethod
-    def _validate_between(cls, content_name, value, min_value, max_value):
-        if value < min_value or value > max_value:
-            raise ValueError(
-                f"{content_name} value should be between {min_value}-{max_value}. "
-                f"Got {value}"
-            )
-
-    @classmethod
-    def _validate_partial(cls, content_name, value):
-        cls._validate_between(content_name, value, 0, 1)
-
-    @classmethod
-    def _validate_alpha(cls, value):
-        cls._validate_partial("alpha", value)
 
     def blend_over(
         self,
@@ -77,13 +57,10 @@ class Color:
             for band in "rgb":
                 front = getattr(front_color, band)
                 back = getattr(back_color, band)
-                bands[band] = _clamp_hex(
-                    (
-                        (front * front_color.a)
-                        + (back * back_color.a * (1 - front_color.a))
-                    )
-                    / blended_alpha
-                )
+                bands[band] = (
+                    (front * front_color.a)
+                    + (back * back_color.a * (1 - front_color.a))
+                ) / blended_alpha
 
             return rgba(**bands, a=blended_alpha)
 
@@ -126,54 +103,69 @@ class Color:
             for band in "rgb":
                 blended = getattr(blended_color, band)
                 back = getattr(back_color, band)
-                bands[band] = _clamp_hex(
-                    (
-                        (blended * blended_color.a)
-                        - (back * back_color.a * (1 - front_color_alpha))
-                    )
-                    / front_color_alpha
-                )
+                bands[band] = (
+                    (blended * blended_color.a)
+                    - (back * back_color.a * (1 - front_color_alpha))
+                ) / front_color_alpha
 
             return rgba(**bands, a=front_color_alpha)
 
 
-class rgba(Color):
-    "A representation of an RGBA color."
+# f"{content_name} value should be between {min_value}-{max_value}. "
+# f"Got {value}"
 
-    def __init__(self, r, g, b, a):
-        self._validate_rgb("red", r)
-        self._validate_rgb("green", g)
-        self._validate_rgb("blue", b)
-        self._validate_alpha(a)
+
+class color_attribute:
+    def __set_name__(self, color_class, name):
+        self.name = name
+
+    def __set__(self, color, value):
+        setattr(color, "f_{self.name}", self.validate(value))
+
+    def __get__(self, color):
+        return getattr(color, f"_{self.name}")
+
+
+class rgb_band(color_attribute):
+    def validate(self, value):
+        return _clamp(round(value), upper=255)
+
+
+class zero_to_one(color_attribute):
+    def validate(self, value):
+        return _clamp(float(value))
+
+
+class rgb(Color):
+    "A representation of an RGB(A) color."
+
+    r = rgb_band("red")
+    g = rgb_band("green")
+    b = rgb_band("blue")
+    a = zero_to_one("alpha")
+
+    def __init__(self, r, g, b, a=1.0):
         self.r = r
         self.g = g
         self.b = b
         self.a = a
 
     def __hash__(self):
-        return hash(("RGBA-color", self.r, self.g, self.b, self.a))
+        return hash(("RGB-color", self.r, self.g, self.b, self.a))
 
     def __repr__(self):
-        return f"rgba({self.r}, {self.g}, {self.b}, {self.a})"
-
-    @classmethod
-    def _validate_rgb(cls, content_name, value):
-        cls._validate_between(content_name, value, 0, 255)
+        return f"rgb({self.r}, {self.g}, {self.b}, {self.a})"
 
     @property
-    def rgba(self):
-        # Explicitly return a rgba value, to ensure that classes which inherit the
-        # parent rgba class, actually return the rgba() value, instead of the child
-        # class. For example, without this fix, doing rgb(20, 20, 20).rgba will
-        # return rgb(20, 20, 20), instead of rgba(20, 20, 20, 1).
-        return rgba(self.r, self.g, self.b, self.a)
+    def rgb(self) -> rgb:
+        return rgb(self.r, self.g, self.b, self.a)
 
     @property
-    def rgb(self):
-        return rgb(self.r, self.g, self.b)
+    def rgba(self) -> rgb:
+        return self.rgb
 
     @property
-    def hsla(self) -> hsla:
+    def hsl(self) -> hsl:
         # Formula used here is from: https://en.wikipedia.org/wiki/HSL_and_HSV#From_RGB
         r_prime = self.r / 255
         g_prime = self.g / 255
@@ -200,61 +192,51 @@ class rgba(Color):
         else:
             saturation = chroma / (1 - abs((2 * value) - chroma - 1))
 
-        return hsla(
-            hue % 360,  # [0,360)
-            _clamp(saturation),  # [0,1]
-            _clamp(lightness),  # [0,1]
-            self.a,  # [0,1]
-        )
+        return hsl(hue, saturation, lightness, self.a)
 
     @property
-    def hsl(self):
-        return self.hsla.hsl
+    def hsla(self) -> hsl:
+        return self.hsl
 
 
-class rgb(rgba):
-    "A representation of an RGB color"
-
-    def __init__(self, r, g, b):
-        super().__init__(r, g, b, 1.0)
-
-    def __repr__(self):
-        return f"rgb({self.r}, {self.g}, {self.b})"
+rgba = rgb
 
 
-class hsla(Color):
-    "A representation of an HSLA color."
+class hue(color_attribute):
+    def validate(self, value):
+        return int(value) % 360
+
+
+class hsl(Color):
+    "A representation of an HSL(A) color."
+
+    h = hue()
+    s = zero_to_one("saturation")
+    l = zero_to_one("lightness")  # noqa: E741
+    a = zero_to_one("alpha")
 
     def __init__(self, h, s, l, a=1.0):  # noqa: E741
-        self._validate_between("hue", h, 0, 360)
-        self._validate_partial("saturation", s)
-        self._validate_partial("lightness", l)
-        self._validate_alpha(a)
         self.h = h
         self.s = s
         self.l = l
         self.a = a
 
     def __hash__(self):
-        return hash(("HSLA-color", self.h, self.s, self.l, self.a))
+        return hash(("HSL-color", self.h, self.s, self.l, self.a))
 
     def __repr__(self):
-        return f"hsla({self.h}, {self.s}, {self.l}, {self.a})"
+        return f"hsl({self.h}, {self.s}, {self.l}, {self.a})"
 
     @property
-    def hsla(self):
-        # Explicitly return a hsla value, to ensure that classes which inherit the
-        # parent hsla class, actually return the hsla() value, instead of the child
-        # class. For example, without this fix, doing hsl(210, 1, 0.5).hsla will
-        # return hsl(210, 1, 0.5), instead of hsla(210, 1, 0.5, 1).
-        return hsla(self.h, self.s, self.l, self.a)
-
-    @property
-    def hsl(self):
+    def hsl(self) -> hsl:
         return hsl(self.h, self.s, self.l)
 
     @property
-    def rgba(self):
+    def hsla(self) -> hsl:
+        return self.hsl
+
+    @property
+    def rgb(self) -> rgb:
         c = (1.0 - abs(2.0 * self.l - 1.0)) * self.s
         h = self.h / 60.0
         x = c * (1.0 - abs(h % 2 - 1.0))
@@ -274,25 +256,18 @@ class hsla(Color):
             r, g, b = c + m, m, x + m
 
         return rgba(
-            round(r * 0xFF),
-            round(g * 0xFF),
-            round(b * 0xFF),
+            r * 0xFF,
+            g * 0xFF,
+            b * 0xFF,
             self.a,
         )
 
     @property
-    def rgb(self):
-        return self.rgba.rgb
+    def rgba(self) -> rgb:
+        return self.rgb
 
 
-class hsl(hsla):
-    "A representation of an HSL color"
-
-    def __init__(self, h, s, l):  # noqa: E741
-        super().__init__(h, s, l, 1.0)
-
-    def __repr__(self):
-        return f"hsl({self.h}, {self.s}, {self.l})"
+hsla = hsl
 
 
 def color(value):

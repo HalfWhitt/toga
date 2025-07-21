@@ -19,10 +19,7 @@ class Color:
         except AttributeError:
             return False
 
-    def blend_over(
-        self,
-        back_color: Color,
-    ) -> rgba:
+    def blend_over(self, back_color: Color) -> rgb:
         """Performs the "over" straight alpha blending operation, compositing
         the front color over the back color.
 
@@ -64,7 +61,7 @@ class Color:
 
             return rgba(**bands, a=blended_alpha)
 
-    def unblend_over(self, back_color: Color, front_color_alpha: float) -> rgba:
+    def unblend_over(self, back_color: Color, front_color_alpha: float) -> rgb:
         """Performs the reverse of the "over" straight alpha blending operation,
         returning the front color.
 

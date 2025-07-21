@@ -307,12 +307,22 @@ def color(value):
 
         if match := re.fullmatch(r"# ( [\d a-f A-F] ){3–8}", value, re.VERBOSE):
             digits = match.groups()
+            values = None
 
             if len(digits) in {3, 4}:
-                return rgb(*[f"{d}{d}" for d in digits])
+                values = [f"{d}{d}" for d in digits]
 
             elif len(digits) in {6, 8}:
-                return rgb(*[f"{d1}{d2}" for d1, d2 in pairwise(digits)])
+                values = [f"{d1}{d2}" for d1, d2 in pairwise(digits)]
+
+            if values:
+                r, g, b, *a = values
+                return rgb(
+                    r=int(r, 16),
+                    b=int(g, 16),
+                    g=int(b, 16),
+                    a=(int(a[0], 16) / 0xFF) if a else 1.0,
+                )
 
         elif match := re.fullmatch(
             r"""
@@ -321,7 +331,7 @@ def color(value):
                 (?:
                     # Modern syntax
                     (?:
-                        (?: (\S*?) \s* ){3}  # Three spaced-separated arguments
+                        (?: (\S*?) \s* ){3}  # Three space-separated arguments
                         (?: / \s* (\S*) )?  # Optional alpha
                     )
                     |
@@ -340,16 +350,21 @@ def color(value):
 
             if color_type == "rgb":
                 r, g, b, *a = args
-                a = _parse_percentage(a[0]) if a else 1.0
-                return rgb(int(r), int(g), int(b), a)
+                return rgb(
+                    r=int(r),
+                    g=int(g),
+                    b=int(b),
+                    a=_parse_percentage(a[0]) if a else 1.0,
+                )
 
-            elif color_type == "hsl":
+            if color_type == "hsl":
                 h, s, l, *a = args  # noqa: E741
-                h = int(h.removesuffix("deg"))
-                s = int(s.removesuffix("%"))
-                l = int(l.removesuffix("%"))  # noqa: E741
-                a = _parse_percentage(a[0]) if a else 1.0
-                return hsl(h, s, l, a)
+                return hsl(
+                    h=int(h.removesuffix("deg")),
+                    s=int(s.removesuffix("%")) / 100,
+                    l=int(l.removesuffix("%")) / 100,
+                    a=_parse_percentage(a[0]) if a else 1.0,
+                )
 
         raise ValueError(f"Unknown color {value}")
 

@@ -1,17 +1,26 @@
 from __future__ import annotations
 
-import re
+import string
+from contextlib import contextmanager
 from itertools import pairwise
 
 from .constants import *  # noqa: F403
 
 
-def _clamp(value, upper=1):
-    return min(upper, max(0, value))
+def _clamp(value, lower, upper=1.0):
+    return min(upper, max(0.0, value))
+
+
+@contextmanager
+def _try_validate(name, value):
+    try:
+        yield
+    except TypeError as exc:
+        raise TypeError(f"Value for {name} must be a number; got {value!r}") from exc
 
 
 class Color:
-    "A base class for all colorspace representations."
+    """A base class for all colorspace representations."""
 
     def __eq__(self, other):
         try:
@@ -21,6 +30,23 @@ class Color:
             return c1.r == c2.r and c1.g == c2.g and c1.b == c2.b and c1.a == c2.a
         except AttributeError:
             return False
+
+    @staticmethod
+    def _validate_zero_to_one(name, value):
+        with _try_validate(name, value):
+            return _clamp(float(value))
+
+    @property
+    def a(self) -> float:
+        return self._a
+
+    @property
+    def rgba(self) -> rgb:
+        return self.rgb
+
+    @property
+    def hsla(self) -> hsl:
+        return self.hsl
 
     def blend_over(self, back_color: Color) -> rgb:
         """Performs the "over" straight alpha blending operation, compositing
@@ -111,44 +137,14 @@ class Color:
             return rgb(**bands, a=front_color_alpha)
 
 
-# f"{content_name} value should be between {min_value}-{max_value}. "
-# f"Got {value}"
-
-
-class _color_attribute:
-    def __set_name__(self, color_class, name):
-        self.name = name
-
-    def __set__(self, color, value):
-        setattr(color, "f_{self.name}", self.validate(value))
-
-    def __get__(self, color):
-        return getattr(color, f"_{self.name}")
-
-
-class _rgb_band(_color_attribute):
-    def validate(self, value):
-        return _clamp(round(value), upper=255)
-
-
-class _zero_to_one(_color_attribute):
-    def validate(self, value):
-        return _clamp(float(value))
-
-
 class rgb(Color):
     "A representation of an RGB(A) color."
 
-    r = _rgb_band("red")
-    g = _rgb_band("green")
-    b = _rgb_band("blue")
-    a = _zero_to_one("alpha")
-
     def __init__(self, r, g, b, a=1.0):
-        self.r = r
-        self.g = g
-        self.b = b
-        self.a = a
+        self._r = self._validate_band("red", r)
+        self._g = self._validate_band("blue", g)
+        self._b = self._validate_band("green", b)
+        self._a = self._validate_zero_to_one("alpha", a)
 
     def __hash__(self):
         return hash(("RGB-color", self.r, self.g, self.b, self.a))
@@ -156,13 +152,29 @@ class rgb(Color):
     def __repr__(self):
         return f"rgb({self.r}, {self.g}, {self.b}, {self.a})"
 
-    @property
-    def rgb(self) -> rgb:
-        return rgb(self.r, self.g, self.b, self.a)
+    def __str__(self):
+        return f"rbg({self.r} {self.g} {self.b} / {self.a})"
+
+    @staticmethod
+    def _validate_band(name, value):
+        with _try_validate(name, value):
+            return _clamp(value, upper=255.0)
 
     @property
-    def rgba(self) -> rgb:
-        return self.rgb
+    def r(self) -> int:
+        return self._r
+
+    @property
+    def g(self) -> int:
+        return self._g
+
+    @property
+    def b(self) -> int:
+        return self._b
+
+    @property
+    def rgb(self) -> rgb:
+        return self
 
     @property
     def hsl(self) -> hsl:
@@ -194,32 +206,19 @@ class rgb(Color):
 
         return hsl(hue, saturation, lightness, self.a)
 
-    @property
-    def hsla(self) -> hsl:
-        return self.hsl
-
 
 rgba = rgb
-
-
-class _hue(_color_attribute):
-    def validate(self, value):
-        return int(value) % 360
 
 
 class hsl(Color):
     "A representation of an HSL(A) color."
 
-    h = _hue()
-    s = _zero_to_one("saturation")
-    l = _zero_to_one("lightness")  # noqa: E741
-    a = _zero_to_one("alpha")
-
     def __init__(self, h, s, l, a=1.0):  # noqa: E741
-        self.h = h
-        self.s = s
-        self.l = l
-        self.a = a
+        with _try_validate("hue", h):
+            self.h = float(h) % 360
+        self._s = self._validate_zero_to_one("saturation", s)
+        self._l = self._validate_zero_to_one("lightness", l)
+        self._a = self._validate_zero_to_one("alpha", a)
 
     def __hash__(self):
         return hash(("HSL-color", self.h, self.s, self.l, self.a))
@@ -227,13 +226,24 @@ class hsl(Color):
     def __repr__(self):
         return f"hsl({self.h}, {self.s}, {self.l}, {self.a})"
 
-    @property
-    def hsl(self) -> hsl:
-        return hsl(self.h, self.s, self.l)
+    def __str__(self):
+        return f"hsl({self.h} {self.s * 100}% {self.l * 100}% / {self.a})"
 
     @property
-    def hsla(self) -> hsl:
-        return self.hsl
+    def h(self) -> int:
+        return self._h
+
+    @property
+    def s(self) -> float:
+        return self._s
+
+    @property
+    def l(self) -> float:  # noqa: E743
+        return self._l
+
+    @property
+    def hsl(self) -> hsl:
+        return self
 
     @property
     def rgb(self) -> rgb:
@@ -255,47 +265,22 @@ class hsl(Color):
         else:
             r, g, b = c + m, m, x + m
 
-        return rgba(
-            r * 0xFF,
-            g * 0xFF,
-            b * 0xFF,
-            self.a,
-        )
-
-    @property
-    def rgba(self) -> rgb:
-        return self.rgb
+        return rgb(r * 0xFF, g * 0xFF, b * 0xFF, self.a)
 
 
 hsla = hsl
-
-
-def _parse_percentage(string):
-    if string.endswith("%"):
-        return int(string.removesuffix("%")) / 100
-    else:
-        return float(string)
 
 
 def color(value):
     """Parse a color from a value.
 
     Accepts:
-    * rgb() instances
-    * hsl() instances
+    * An rgb() or hsl() instance
+    * A named color
     * '#rgb'
     * '#rgba'
     * '#rrggbb'
     * '#rrggbbaa'
-    * '#RGB'
-    * '#RGBA'
-    * '#RRGGBB'
-    * '#RRGGBBAA'
-    * 'rgb(0, 0, 0)'
-    * 'rgba(0, 0, 0, 0.0)'
-    * 'hsl(0, 0%, 0%)'
-    * 'hsla(0, 0%, 0%, 0.0)'
-    * A named color
     """
 
     if isinstance(value, Color):
@@ -305,8 +290,8 @@ def color(value):
         if result := NAMED_COLOR.get(value.lower()):
             return result
 
-        if match := re.fullmatch(r"# ( [\d a-f A-F] ){3–8}", value, re.VERBOSE):
-            digits = match.groups()
+        pound, *digits = value
+        if pound == "#" and all(d in string.hexdigits for d in digits):
             values = None
 
             if len(digits) in {3, 4}:
@@ -324,49 +309,7 @@ def color(value):
                     a=(int(a[0], 16) / 0xFF) if a else 1.0,
                 )
 
-        elif match := re.fullmatch(
-            r"""
-                ( rgb | hsl ) a?
-                \(\s*  # Open paren
-                (?:
-                    # Modern syntax
-                    (?:
-                        (?: (\S*?) \s* ){3}  # Three space-separated arguments
-                        (?: / \s* (\S*) )?  # Optional alpha
-                    )
-                    |
-                    # Legacy comma-separated syntax
-                    (?:
-                        (?: (\S*?), \s* ){2-3}  # two or three non-last arguments
-                        ( \S*? ),?  # Comma after last argument is optional
-                    )
-                )
-                \s*\)  # Close paren
-            """,
-            value,
-            re.VERBOSE,
-        ):
-            color_type, *args = match.groups()
-
-            if color_type == "rgb":
-                r, g, b, *a = args
-                return rgb(
-                    r=int(r),
-                    g=int(g),
-                    b=int(b),
-                    a=_parse_percentage(a[0]) if a else 1.0,
-                )
-
-            if color_type == "hsl":
-                h, s, l, *a = args  # noqa: E741
-                return hsl(
-                    h=int(h.removesuffix("deg")),
-                    s=int(s.removesuffix("%")) / 100,
-                    l=int(l.removesuffix("%")) / 100,
-                    a=_parse_percentage(a[0]) if a else 1.0,
-                )
-
-        raise ValueError(f"Unknown color {value}")
+        raise ValueError(f"Unknown color: {value!r}")
 
 
 NAMED_COLOR = {

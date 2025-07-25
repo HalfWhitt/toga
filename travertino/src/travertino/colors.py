@@ -7,8 +7,8 @@ from itertools import pairwise
 from .constants import *  # noqa: F403
 
 
-def _clamp(value, lower, upper=1.0):
-    return min(upper, max(0.0, value))
+def _clamp(value, lower, upper):
+    return min(upper, max(lower, value))
 
 
 @contextmanager
@@ -34,7 +34,7 @@ class Color:
     @staticmethod
     def _validate_zero_to_one(name, value):
         with _try_validate(name, value):
-            return _clamp(float(value))
+            return _clamp(float(value), 0.0, 1.0)
 
     @property
     def a(self) -> float:
@@ -73,7 +73,9 @@ class Color:
             # front color.
             return front_color
 
-        blended_alpha = _clamp(front_color.a + ((1 - front_color.a) * back_color.a))
+        blended_alpha = _clamp(
+            front_color.a + ((1 - front_color.a) * back_color.a), 0.0, 1.0
+        )
 
         if blended_alpha == 0:
             # Don't further blend the color, to prevent divide by 0.
@@ -158,7 +160,7 @@ class rgb(Color):
     @staticmethod
     def _validate_band(name, value):
         with _try_validate(name, value):
-            return _clamp(value, upper=255.0)
+            return _clamp(int(value), 0, 255)
 
     @property
     def r(self) -> int:
@@ -178,6 +180,9 @@ class rgb(Color):
 
     @property
     def hsl(self) -> hsl:
+        if cached := getattr(self, "_hsl", None):
+            return cached
+
         # Formula used here is from: https://en.wikipedia.org/wiki/HSL_and_HSV#From_RGB
         r_prime = self.r / 255
         g_prime = self.g / 255
@@ -204,7 +209,8 @@ class rgb(Color):
         else:
             saturation = chroma / (1 - abs((2 * value) - chroma - 1))
 
-        return hsl(hue, saturation, lightness, self.a)
+        self._hsl = hsl(hue, saturation, lightness, self.a)
+        return self._hsl
 
 
 rgba = rgb
@@ -215,7 +221,7 @@ class hsl(Color):
 
     def __init__(self, h, s, l, a=1.0):  # noqa: E741
         with _try_validate("hue", h):
-            self.h = float(h) % 360
+            self.h = int(h) % 360
         self._s = self._validate_zero_to_one("saturation", s)
         self._l = self._validate_zero_to_one("lightness", l)
         self._a = self._validate_zero_to_one("alpha", a)
@@ -227,7 +233,7 @@ class hsl(Color):
         return f"hsl({self.h}, {self.s}, {self.l}, {self.a})"
 
     def __str__(self):
-        return f"hsl({self.h} {self.s * 100}% {self.l * 100}% / {self.a})"
+        return f"hsl({self.h} {round(self.s * 100)}% {round(self.l * 100)}% / {self.a})"
 
     @property
     def h(self) -> int:
@@ -247,6 +253,9 @@ class hsl(Color):
 
     @property
     def rgb(self) -> rgb:
+        if cached := getattr(self, "_rgb", None):
+            return cached
+
         c = (1.0 - abs(2.0 * self.l - 1.0)) * self.s
         h = self.h / 60.0
         x = c * (1.0 - abs(h % 2 - 1.0))
@@ -265,7 +274,8 @@ class hsl(Color):
         else:
             r, g, b = c + m, m, x + m
 
-        return rgb(r * 0xFF, g * 0xFF, b * 0xFF, self.a)
+        self._rgb = rgb(r * 0xFF, g * 0xFF, b * 0xFF, self.a)
+        return self._rgb
 
 
 hsla = hsl

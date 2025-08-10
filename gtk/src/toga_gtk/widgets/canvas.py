@@ -89,13 +89,14 @@ class Canvas(Widget):
             self.interface.on_alt_drag(event.x, event.y)
 
     def mouse_up(self, obj, event):
-        if event.button == 1:
-            self.interface.on_release(event.x, event.y)
-        elif event.button == 3:
-            self.interface.on_alt_release(event.x, event.y)
-        else:  # pragma: no cover
-            # Don't handle other button presses
-            pass
+        match event.button:
+            case 1:
+                self.interface.on_release(event.x, event.y)
+            case 3:
+                self.interface.on_alt_release(event.x, event.y)
+            case _:  # pragma: no cover
+                # Don't handle other button presses
+                pass
 
     def redraw(self):
         self.native.queue_draw()

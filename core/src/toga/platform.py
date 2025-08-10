@@ -73,40 +73,39 @@ def get_platform_factory() -> ModuleType:
 
     else:
         toga_backends = find_backends()
-        if len(toga_backends) == 0:
-            raise RuntimeError("No Toga backend could be loaded.")
-        elif len(toga_backends) == 1:
-            backend = toga_backends[0]
-        else:
-            # multiple backends are installed: choose the one that
-            # matches the host platform
-            matching_backends = [
-                backend for backend in toga_backends if backend.name == current_platform
-            ]
-            if len(matching_backends) == 0:
+        match len(toga_backends):
+            case 0:
+                raise RuntimeError("No Toga backend could be loaded.")
+            case 1:
+                backend = toga_backends[0]
+            case _:
+                # Multiple backends are installed: choose the one that matches the host
+                # platform
+                matching_backends = [
+                    backend
+                    for backend in toga_backends
+                    if backend.name == current_platform
+                ]
                 toga_backends_string = ", ".join(
-                    [f"{backend.value!r} ({backend.name})" for backend in toga_backends]
+                    f"{backend.value!r} ({backend.name})" for backend in toga_backends
                 )
-                raise RuntimeError(
-                    f"Multiple Toga backends are installed ({toga_backends_string}), "
-                    f"but none of them match your current platform "
-                    f"({current_platform!r}). "
-                    f"Install a backend for your current platform, or use "
-                    f"TOGA_BACKEND to specify a backend."
-                )
-            if len(matching_backends) > 1:
-                toga_backends_string = ", ".join(
-                    [
-                        f"{backend.value!r} ({backend.name})"
-                        for backend in matching_backends
-                    ]
-                )
-                raise RuntimeError(
-                    f"Multiple candidate toga backends found: "
-                    f"({toga_backends_string}). "
-                    f"Uninstall the backends you don't require, or use "
-                    f"TOGA_BACKEND to specify a backend."
-                )
-            backend = matching_backends[0]
+                match len(matching_backends):
+                    case 0:
+                        raise RuntimeError(
+                            f"Multiple Toga backends are installed "
+                            f"({toga_backends_string}), but none of them match your "
+                            f"current platform ({current_platform!r}). Install a "
+                            f"backend for your current platform, or use TOGA_BACKEND "
+                            f"to specify a backend."
+                        )
+                    case 1:
+                        backend = matching_backends[0]
+                    case _:
+                        raise RuntimeError(
+                            f"Multiple candidate toga backends found: "
+                            f"({toga_backends_string}). "
+                            f"Uninstall the backends you don't require, or use "
+                            f"TOGA_BACKEND to specify a backend."
+                        )
         factory = importlib.import_module(f"{backend.value}.factory")
     return factory

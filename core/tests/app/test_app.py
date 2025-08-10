@@ -659,8 +659,10 @@ async def test_presentation_mode_no_op():
     # Entering presentation mode without proper type of parameter is a no-op.
     with pytest.raises(
         ValueError,
-        match="Presentation layout should be a list of windows, "
-        "or a dict mapping windows to screens.",
+        match=(
+            "Presentation layout should be a list of windows, or a dict mapping "
+            "screens to their windows."
+        ),
     ):
         app.enter_presentation_mode(toga.Window())
     assert not app.in_presentation_mode

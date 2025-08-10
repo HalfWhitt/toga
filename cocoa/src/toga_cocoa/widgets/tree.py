@@ -63,32 +63,29 @@ class TogaTree(NSOutlineView):
 
     @objc_method
     def outlineView_viewForTableColumn_item_(self, tree, column, item):
-        col_identifier = str(column.identifier)
-
         try:
-            value = getattr(item.attrs["node"], col_identifier)
-
-            # if the value is a widget itself, just draw the widget!
-            if isinstance(value, toga.Widget):
-                return value._impl.native
-
-            # Allow for an (icon, value) tuple as the simple case
-            # for encoding an icon in a table cell. Otherwise, look
-            # for an icon attribute.
-            elif isinstance(value, tuple):
-                icon, value = value
-            else:
-                try:
-                    icon = value.icon
-                except AttributeError:
-                    icon = None
+            value = getattr(item.attrs["node"], str(column.identifier))
         except AttributeError:
-            # If the node doesn't have a property with the
-            # accessor name, assume an empty string value.
+            # If the node doesn't have a property with the accessor name, assume an
+            # empty string value.
             value = self.interface.missing_value
             icon = None
+        else:
+            match value:
+                case toga.Widget():
+                    # If the value is a widget itself, just draw the widget!
+                    return value._impl.native
+                case tuple():
+                    # Allow for an (icon, value) tuple as the simple case for encoding
+                    # an icon in a table cell. Otherwise, look for an icon attribute.
+                    icon, value = value
+                case _:
+                    try:
+                        icon = value.icon
+                    except AttributeError:
+                        icon = None
 
-        # creates a NSTableCellView from interface-builder template (does not exist)
+        # Creates a NSTableCellView from interface-builder template (does not exist)
         # or reuses an existing view which is currently not needed for painting
         # returns None (nil) if both fails
         identifier = at(f"CellView_{self.interface.id}")

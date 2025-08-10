@@ -219,15 +219,15 @@ class Canvas(Widget):
         total_height = scaled_line_height * len(lines)
 
         # paint.ascent returns a negative number.
-        if baseline == Baseline.TOP:
-            top = y - paint.ascent()
-        elif baseline == Baseline.MIDDLE:
-            top = y - paint.ascent() - (total_height / 2)
-        elif baseline == Baseline.BOTTOM:
-            top = y - paint.ascent() - total_height
-        else:
-            # Default to Baseline.ALPHABETIC
-            top = y
+        match baseline:
+            case Baseline.TOP:
+                top = y - paint.ascent()
+            case Baseline.MIDDLE:
+                top = y - paint.ascent() - (total_height / 2)
+            case Baseline.BOTTOM:
+                top = y - paint.ascent() - total_height
+            case Baseline.ALPHABETIC:
+                top = y
 
         for line_num, line in enumerate(text.splitlines()):
             # FILL_AND_STROKE doesn't allow separate colors, so we have to draw twice.

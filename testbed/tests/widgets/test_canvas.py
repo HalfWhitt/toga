@@ -756,12 +756,13 @@ async def test_multiline_text(canvas, probe):
         text = caption(baseline)
         width, height = canvas.measure_text(text, font)
         left = X[i]
-        if baseline == Baseline.TOP:
-            top = y
-        elif baseline == Baseline.MIDDLE:
-            top = round(y - (height / 2))
-        elif baseline == Baseline.BOTTOM:
-            top = y - height
+        match baseline:
+            case Baseline.TOP:
+                top = y
+            case Baseline.MIDDLE:
+                top = round(y - (height / 2))
+            case Baseline.BOTTOM:
+                top = y - height
 
         with canvas.context.Stroke(color=CORNFLOWERBLUE) as box:
             box.rect(left, top, width, height)

@@ -27,13 +27,14 @@ from .properties import (  # noqa: F401
 # make out, there's an internal private widget that actually gets the focus, but
 # that widget isn't visible to GObject. We can't use test_focus_noop because
 # the textinput *does* lose focus when focus() is invoked on selection.
-if toga.platform.current_platform == "linux":
-    pass
-elif toga.platform.current_platform == "android":
-    # This widget can't be given focus on Android.
-    from .properties import test_focus_noop  # noqa: F401
-else:
-    from .properties import test_focus  # noqa: F401
+match toga.platform.current_platform:
+    case "linux":
+        pass
+    case "android":
+        # This widget can't be given focus on Android.
+        from .properties import test_focus_noop  # noqa: F401
+    case _:
+        from .properties import test_focus  # noqa: F401
 
 
 @pytest.fixture

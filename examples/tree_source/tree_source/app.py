@@ -118,22 +118,24 @@ class TreeSourceApp(toga.App):
             files = len(widget.selection)
         else:
             files = 0 if widget.selection is None else 1
-        if files == 0:
-            self.label.text = "A view of the current directory!"
-        elif files == 1:
-            self.label.text = f"You selected {files} item"
-        else:
-            self.label.text = f"You selected {files} items"
+        match files:
+            case 0:
+                self.label.text = "A view of the current directory!"
+            case 1:
+                self.label.text = f"You selected {files} item"
+            case _:
+                self.label.text = f"You selected {files} items"
 
     def activate_handler(self, widget, node):
         # open the file or folder in the platform's default app
         self.label.text = f"You started {node.path}"
-        if platform.system() == "Darwin":
-            subprocess.call(("open", node.path))
-        elif platform.system() == "Windows":
-            os.startfile(node.path)
-        else:
-            subprocess.call(("xdg-open", node.path))
+        match platform.system():
+            case "Darwin":
+                subprocess.call(("open", node.path))
+            case "Windows":
+                os.startfile(node.path)
+            case _:
+                subprocess.call(("xdg-open", node.path))
 
     def startup(self):
         # Set up main window

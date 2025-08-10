@@ -64,12 +64,13 @@ class App:
         pass
 
     def set_main_window(self, window):
-        if window is None:
-            raise RuntimeError("Session-based apps are not supported on Textual")
-        elif window == toga.App.BACKGROUND:
-            raise RuntimeError("Background apps are not supported on Textual")
-        else:
-            self.native.push_screen(self.interface.main_window.id)
+        match window:
+            case None:
+                raise RuntimeError("Session-based apps are not supported on Textual")
+            case toga.App.BACKGROUND:
+                raise RuntimeError("Background apps are not supported on Textual")
+            case _:
+                self.native.push_screen(self.interface.main_window.id)
 
     ######################################################################
     # App resources

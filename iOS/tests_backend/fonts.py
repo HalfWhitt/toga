@@ -31,12 +31,13 @@ class FontMixin:
     def assert_font_options(self, weight=NORMAL, style=NORMAL, variant=NORMAL):
         # Cocoa's FANTASY (Papyrus) and CURSIVE (Snell Roundhand) system
         # fonts don't have any bold/italic variants.
-        if str(self.font.familyName) == "Papyrus":
-            print("Ignoring options on FANTASY system font")
-            return
-        elif str(self.font.familyName) == "Snell Roundhand":
-            print("Ignoring options on CURSIVE system font")
-            return
+        match str(self.font.familyName):
+            case "Papyrus":
+                print("Ignoring options on FANTASY system font")
+                return
+            case "Snell Roundhand":
+                print("Ignoring options on CURSIVE system font")
+                return
 
         traits = self.font.fontDescriptor.symbolicTraits
 

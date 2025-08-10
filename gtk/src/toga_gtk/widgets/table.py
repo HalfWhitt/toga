@@ -26,17 +26,17 @@ class TogaRow(GObject.Object):
                 return None
 
     def text(self, attr, missing_value):
-        data = getattr(self.value, attr, None)
-        if isinstance(data, toga.Widget):
-            warnings.warn(
-                "GTK does not support the use of widgets in cells",
-                stacklevel=2,
-            )
-            text = None
-        elif isinstance(data, tuple):
-            text = data[1]
-        else:
-            text = data
+        match data := getattr(self.value, attr, None):
+            case toga.Widget():
+                warnings.warn(
+                    "GTK does not support the use of widgets in cells",
+                    stacklevel=2,
+                )
+                text = None
+            case tuple():
+                text = data[1]
+            case _:
+                text = data
 
         if text is None:
             return missing_value

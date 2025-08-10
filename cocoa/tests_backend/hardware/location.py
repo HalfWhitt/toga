@@ -37,12 +37,14 @@ class LocationProbe(AppProbe):
         def _mock_auth_status():
             if self._mock_background_permission == 1:
                 return CLAuthorizationStatus.AuthorizedAlways.value
-            elif self._mock_permission == 1:
-                return CLAuthorizationStatus.AuthorizedWhenInUse.value
-            elif self._mock_permission == 0:
-                return CLAuthorizationStatus.Denied.value
-            else:
-                return CLAuthorizationStatus.NotDetermined.value
+
+            match self._mock_permission:
+                case 1:
+                    return CLAuthorizationStatus.AuthorizedWhenInUse.value
+                case 0:
+                    return CLAuthorizationStatus.Denied.value
+                case _:
+                    return CLAuthorizationStatus.NotDetermined.value
 
         type(self._mock_location_manager).authorizationStatus = PropertyMock(
             side_effect=_mock_auth_status

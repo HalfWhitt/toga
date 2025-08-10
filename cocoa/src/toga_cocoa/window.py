@@ -432,70 +432,73 @@ class Window:
             self._pending_state_transition = None
             return
 
-        elif target_state == WindowState.MAXIMIZED:
-            self.native.setIsZoomed(True)
-            # No need to check for other pending states,
-            # since this is fully applied at this point.
-            self._pending_state_transition = None
+        match target_state:
+            case WindowState.MAXIMIZED:
+                self.native.setIsZoomed(True)
+                # No need to check for other pending states,
+                # since this is fully applied at this point.
+                self._pending_state_transition = None
 
-        elif target_state == WindowState.MINIMIZED:
-            self.native.setIsMiniaturized(True)
+            case WindowState.MINIMIZED:
+                self.native.setIsMiniaturized(True)
 
-        elif target_state == WindowState.FULLSCREEN:
-            self.native.toggleFullScreen(self.native)
-
-        elif target_state == WindowState.PRESENTATION:
-            self._before_presentation_mode_screen = self.interface.screen
-            opts = NSMutableDictionary.alloc().init()
-            opts.setObject(
-                NSNumber.numberWithBool(True),
-                forKey="NSFullScreenModeAllScreens",
-            )
-            # The widgets are actually added to
-            # window._impl.container.native, instead of
-            # window.content._impl.native. And
-            # window._impl.native.contentView is
-            # window._impl.container.native. Hence,
-            # we need to go fullscreen on
-            # window._impl.container.native instead.
-            self.container.native.enterFullScreenMode(
-                self.interface.screen._impl.native, withOptions=opts
-            )
-
-            # Going presentation mode causes the window content
-            # to be re-homed in a NSFullScreenWindow; teach the
-            # new parent window about its Toga representations.
-            self.container.native.window._impl = self
-            self.container.native.window.interface = self.interface
-            self.interface.content.refresh()
-
-            # No need to check for other pending states,
-            # since this is fully applied at this point.
-            self._pending_state_transition = None
-
-        else:  # target_state == WindowState.NORMAL:
-            if current_state == WindowState.MAXIMIZED:
-                self.native.setIsZoomed(False)
-                self._apply_state(self._pending_state_transition)
-
-            elif current_state == WindowState.MINIMIZED:
-                self.native.setIsMiniaturized(False)
-
-            elif current_state == WindowState.FULLSCREEN:
+            case WindowState.FULLSCREEN:
                 self.native.toggleFullScreen(self.native)
 
-            else:  # current_state == WindowState.PRESENTATION:
+            case WindowState.PRESENTATION:
+                self._before_presentation_mode_screen = self.interface.screen
                 opts = NSMutableDictionary.alloc().init()
                 opts.setObject(
-                    NSNumber.numberWithBool(True), forKey="NSFullScreenModeAllScreens"
+                    NSNumber.numberWithBool(True),
+                    forKey="NSFullScreenModeAllScreens",
                 )
-                self.container.native.exitFullScreenModeWithOptions(opts)
+                # The widgets are actually added to
+                # window._impl.container.native, instead of
+                # window.content._impl.native. And
+                # window._impl.native.contentView is
+                # window._impl.container.native. Hence,
+                # we need to go fullscreen on
+                # window._impl.container.native instead.
+                self.container.native.enterFullScreenMode(
+                    self.interface.screen._impl.native, withOptions=opts
+                )
+
+                # Going presentation mode causes the window content
+                # to be re-homed in a NSFullScreenWindow; teach the
+                # new parent window about its Toga representations.
+                self.container.native.window._impl = self
+                self.container.native.window.interface = self.interface
                 self.interface.content.refresh()
 
-                self.interface.screen = self._before_presentation_mode_screen
-                del self._before_presentation_mode_screen
+                # No need to check for other pending states,
+                # since this is fully applied at this point.
+                self._pending_state_transition = None
 
-                self._apply_state(self._pending_state_transition)
+            case WindowState.NORMAL:
+                match current_state:
+                    case WindowState.MAXIMIZED:
+                        self.native.setIsZoomed(False)
+                        self._apply_state(self._pending_state_transition)
+
+                    case WindowState.MINIMIZED:
+                        self.native.setIsMiniaturized(False)
+
+                    case WindowState.FULLSCREEN:
+                        self.native.toggleFullScreen(self.native)
+
+                    case WindowState.PRESENTATION:
+                        opts = NSMutableDictionary.alloc().init()
+                        opts.setObject(
+                            NSNumber.numberWithBool(True),
+                            forKey="NSFullScreenModeAllScreens",
+                        )
+                        self.container.native.exitFullScreenModeWithOptions(opts)
+                        self.interface.content.refresh()
+
+                        self.interface.screen = self._before_presentation_mode_screen
+                        del self._before_presentation_mode_screen
+
+                        self._apply_state(self._pending_state_transition)
 
     ######################################################################
     # Window capabilities

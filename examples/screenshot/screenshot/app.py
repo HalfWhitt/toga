@@ -393,8 +393,11 @@ class ScreenshotGeneratorApp(toga.App):
         ]:
             try:
                 content = getattr(self, f"create_{content_type}")()
-                if content:
-                    if content_type == "main_window":
+                if not content:
+                    return
+
+                match content:
+                    case "main_window":
                         # image = self.main_window.screen.as_image()
                         # cropped = image.crop(... crop to window size ...)
                         #
@@ -410,7 +413,7 @@ class ScreenshotGeneratorApp(toga.App):
                         self.main_window.content = toga.Box()
 
                         cropped = None
-                    elif content_type == "window":
+                    case "window":
                         content.show()
 
                         # image = self.main_window.screen.as_image()
@@ -421,7 +424,7 @@ class ScreenshotGeneratorApp(toga.App):
                         await self.main_window.dialog(
                             toga.InfoDialog(
                                 "Manual intervention",
-                                "Screenshot the secondary window, then press Done.",
+                                "Screenshot the secondary window, and then press Done.",
                             )
                         )
                         await self.manual_screenshot(toga.Box())
@@ -429,12 +432,11 @@ class ScreenshotGeneratorApp(toga.App):
 
                         content.close()
 
-                    elif (
-                        content_type in {"webview", "mapview"}
-                        and toga.platform.current_platform == "macOS"
+                    case "webview" | "mapview" if (
+                        toga.platform.current_platform == "macOS"
                     ):
-                        # Manual screenshot required on macOS because screenshots don't
-                        # contain all the rendered content.
+                        # Manual screenshot required on macOS because screenshots
+                        # don't contain all the rendered content.
                         await self.main_window.dialog(
                             toga.InfoDialog(
                                 "Manual intervention",
@@ -443,7 +445,7 @@ class ScreenshotGeneratorApp(toga.App):
                         )
                         await self.manual_screenshot(content)
                         cropped = None
-                    else:
+                    case _:
                         self.main_window.content = toga.Box(
                             children=[content],
                             direction=COLUMN,
@@ -476,11 +478,11 @@ class ScreenshotGeneratorApp(toga.App):
                             )
                         )
 
-                    if cropped:
-                        cropped.save(
-                            self.app.paths.data
-                            / f"{content_type}-{toga.platform.current_platform}.png"
-                        )
+                if cropped:
+                    cropped.save(
+                        self.app.paths.data
+                        / f"{content_type}-{toga.platform.current_platform}.png"
+                    )
 
             except NotImplementedError:
                 pass

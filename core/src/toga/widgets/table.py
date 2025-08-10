@@ -144,12 +144,13 @@ class Table(Widget):
 
     @data.setter
     def data(self, data: SourceT | Iterable | None) -> None:
-        if data is None:
-            self._data = ListSource(accessors=self._accessors, data=[])
-        elif isinstance(data, Source):
-            self._data = data
-        else:
-            self._data = ListSource(accessors=self._accessors, data=data)
+        match data:
+            case None:
+                self._data = ListSource(accessors=self._accessors, data=[])
+            case Source():
+                self._data = data
+            case _:
+                self._data = ListSource(accessors=self._accessors, data=data)
 
         self._data.add_listener(self._impl)
         self._impl.change_source(source=self._data)
@@ -170,13 +171,13 @@ class Table(Widget):
         If multiple selection is *not* enabled, returns the selected Row object, or
         :any:`None` if no row is currently selected.
         """
-        selection = self._impl.get_selection()
-        if isinstance(selection, list):
-            return [self.data[index] for index in selection]
-        elif selection is None:
-            return None
-        else:
-            return self.data[selection]
+        match selection := self._impl.get_selection():
+            case list():
+                return [self.data[index] for index in selection]
+            case None:
+                return None
+            case _:
+                return self.data[selection]
 
     def scroll_to_top(self) -> None:
         """Scroll the view so that the top of the list (first row) is visible."""

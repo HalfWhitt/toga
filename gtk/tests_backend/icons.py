@@ -28,25 +28,26 @@ class IconProbe(BaseProbe):
         assert isinstance(self.icon._impl.native(64), GdkPixbuf.Pixbuf)
 
     def assert_icon_content(self, path):
-        if path == "resources/icons/green":
-            # Three icons given with size; others sizes match the generic name
-            assert self.icon._impl.paths == {
-                16: self.app.paths.app / "resources/icons/green-16.png",
-                32: self.app.paths.app / "resources/icons/green-32.png",
-                64: self.app.paths.app / "resources/icons/green.png",
-                72: self.app.paths.app / "resources/icons/green-72.png",
-                128: self.app.paths.app / "resources/icons/green.png",
-                256: self.app.paths.app / "resources/icons/green.png",
-                512: self.app.paths.app / "resources/icons/green.png",
-            }
-        elif path == "resources/icons/orange":
-            # All icons match the single size .ico
-            assert self.icon._impl.paths == dict.fromkeys(
-                [16, 32, 64, 72, 128, 256, 512],
-                self.app.paths.app / "resources/icons/orange.ico",
-            )
-        else:
-            pytest.fail("Unknown icon resource")
+        match path:
+            case "resources/icons/green":
+                # Three icons given with size; others sizes match the generic name
+                assert self.icon._impl.paths == {
+                    16: self.app.paths.app / "resources/icons/green-16.png",
+                    32: self.app.paths.app / "resources/icons/green-32.png",
+                    64: self.app.paths.app / "resources/icons/green.png",
+                    72: self.app.paths.app / "resources/icons/green-72.png",
+                    128: self.app.paths.app / "resources/icons/green.png",
+                    256: self.app.paths.app / "resources/icons/green.png",
+                    512: self.app.paths.app / "resources/icons/green.png",
+                }
+            case "resources/icons/orange":
+                # All icons match the single size .ico
+                assert self.icon._impl.paths == dict.fromkeys(
+                    [16, 32, 64, 72, 128, 256, 512],
+                    self.app.paths.app / "resources/icons/orange.ico",
+                )
+            case _:
+                pytest.fail("Unknown icon resource")
 
     def assert_default_icon_content(self):
         assert self.icon._impl.paths == {

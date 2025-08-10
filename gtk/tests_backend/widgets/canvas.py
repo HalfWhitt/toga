@@ -15,15 +15,15 @@ class CanvasProbe(SimpleProbe):
         pytest.skip("GTK4 doesn't support a canvas yet")
 
     def reference_variant(self, reference):
-        if reference == "multiline_text":
-            if IS_WAYLAND:
+        match reference:
+            case "multiline_text" if IS_WAYLAND:
                 return f"{reference}-gtk-wayland"
-            else:
+            case "multiline_text":
                 return f"{reference}-gtk-x11"
-        elif reference == "write_text":
-            return f"{reference}-gtk"
-        else:
-            return reference
+            case "write_text":
+                return f"{reference}-gtk"
+            case _:
+                return reference
 
     def get_image(self):
         return Image.open(BytesIO(self.impl.get_image_data()))

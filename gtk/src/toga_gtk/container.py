@@ -39,10 +39,11 @@ if GTK_VERSION >= (4, 0, 0):  # pragma: no-cover-if-gtk3
 
             # The container will conform to the size of the allocation it is given,
             # so the min and preferred size are the same.
-            if orientation == Gtk.Orientation.HORIZONTAL:
-                return container.min_width, container.min_width, -1, -1
-            elif orientation == Gtk.Orientation.VERTICAL:
-                return container.min_height, container.min_height, -1, -1
+            match orientation:
+                case Gtk.Orientation.HORIZONTAL:
+                    return container.min_width, container.min_width, -1, -1
+                case Gtk.Orientation.VERTICAL:
+                    return container.min_height, container.min_height, -1, -1
 
         def do_allocate(self, container, width, height, baseline):
             """Perform the actual layout for the all widget's children.

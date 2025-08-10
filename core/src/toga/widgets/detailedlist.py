@@ -139,12 +139,13 @@ class DetailedList(Widget):
 
     @data.setter
     def data(self, data: SourceT | Iterable | None) -> None:
-        if data is None:
-            self._data = ListSource(data=[], accessors=self.accessors)
-        elif isinstance(data, Source):
-            self._data = data
-        else:
-            self._data = ListSource(data=data, accessors=self.accessors)
+        match data:
+            case None:
+                self._data = ListSource(data=[], accessors=self.accessors)
+            case Source():
+                self._data = data
+            case _:
+                self._data = ListSource(data=data, accessors=self.accessors)
 
         self._data.add_listener(self._impl)
         self._impl.change_source(source=self._data)

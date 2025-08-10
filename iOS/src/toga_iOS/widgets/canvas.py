@@ -280,15 +280,16 @@ class Canvas(Widget):
         scaled_line_height = self._line_height(font, line_height)
         total_height = scaled_line_height * len(lines)
 
-        if baseline == Baseline.TOP:
-            top = y + font.native.ascender
-        elif baseline == Baseline.MIDDLE:
-            top = y + font.native.ascender - (total_height / 2)
-        elif baseline == Baseline.BOTTOM:
-            top = y + font.native.ascender - total_height
-        else:
-            # Default to Baseline.ALPHABETIC
-            top = y
+        match baseline:
+            case Baseline.TOP:
+                top = y + font.native.ascender
+            case Baseline.MIDDLE:
+                top = y + font.native.ascender - (total_height / 2)
+            case Baseline.BOTTOM:
+                top = y + font.native.ascender - total_height
+            case _:
+                # Default to Baseline.ALPHABETIC
+                top = y
 
         for line_num, line in enumerate(lines):
             # Rounding minimizes differences between scale factors.

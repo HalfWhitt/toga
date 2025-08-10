@@ -783,29 +783,30 @@ def find_event(event_path, main_window_probe):
     from System.Reflection import BindingFlags
 
     event_class, event_name = event_path.split(".")
-    if event_class == "Form":
-        return getattr(main_window_probe.native, f"On{event_name}")
+    match event_class:
+        case "Form":
+            return getattr(main_window_probe.native, f"On{event_name}")
 
-    elif event_class == "SystemEvents":
-        # There are no "On" methods in this class, so we need to use reflection.
-        SystemEvents_type = SystemEvents().GetType()
-        binding_flags = BindingFlags.Static | BindingFlags.NonPublic
-        RaiseEvent = [
-            method
-            for method in SystemEvents_type.GetMethods(binding_flags)
-            if method.Name == "RaiseEvent" and len(method.GetParameters()) == 2
-        ][0]
+        case "SystemEvents":
+            # There are no "On" methods in this class, so we need to use reflection.
+            SystemEvents_type = SystemEvents().GetType()
+            binding_flags = BindingFlags.Static | BindingFlags.NonPublic
+            RaiseEvent = [
+                method
+                for method in SystemEvents_type.GetMethods(binding_flags)
+                if method.Name == "RaiseEvent" and len(method.GetParameters()) == 2
+            ][0]
 
-        event_key = SystemEvents_type.GetField(
-            f"On{event_name}Event", binding_flags
-        ).GetValue(None)
+            event_key = SystemEvents_type.GetField(
+                f"On{event_name}Event", binding_flags
+            ).GetValue(None)
 
-        return lambda event_args: RaiseEvent.Invoke(
-            None, [event_key, Array[Object]([None, event_args])]
-        )
+            return lambda event_args: RaiseEvent.Invoke(
+                None, [event_key, Array[Object]([None, event_args])]
+            )
 
-    else:
-        raise AssertionError(f"unknown event class {event_class}")
+        case _:
+            raise AssertionError(f"unknown event class {event_class}")
 
 
 async def test_session_based_app(

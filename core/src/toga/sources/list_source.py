@@ -147,12 +147,13 @@ class ListSource(Source):
 
     # This behavior is documented in list_source.rst.
     def _create_row(self, data: object) -> Row:
-        if isinstance(data, Mapping):
-            row = Row(**data)
-        elif hasattr(data, "__iter__") and not isinstance(data, str):
-            row = Row(**dict(zip(self._accessors, data)))
-        else:
-            row = Row(**{self._accessors[0]: data})
+        match data:
+            case Mapping():
+                row = Row(**data)
+            case Iterable() if not isinstance(data, str):
+                row = Row(**dict(zip(self._accessors, data)))
+            case _:
+                row = Row(**{self._accessors[0]: data})
         row._source = self
         return row
 

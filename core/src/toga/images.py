@@ -118,30 +118,31 @@ class Image:
         self.factory = get_platform_factory()
         self._path = None
 
-        # Any "lump of bytes" should be valid here.
-        if isinstance(src, bytes | bytearray | memoryview):
-            self._impl = self.factory.Image(interface=self, data=src)
+        match src:
+            # Any "lump of bytes" should be valid here.
+            case bytes() | bytearray() | memoryview():
+                self._impl = self.factory.Image(interface=self, data=src)
 
-        elif isinstance(src, str | Path):
-            self._path = toga.App.app.paths.app / src
-            if not self._path.is_file():
-                raise FileNotFoundError(f"Image file {self._path} does not exist")
-            self._impl = self.factory.Image(interface=self, path=self._path)
+            case str() | Path():
+                self._path = toga.App.app.paths.app / src
+                if not self._path.is_file():
+                    raise FileNotFoundError(f"Image file {self._path} does not exist")
+                self._impl = self.factory.Image(interface=self, path=self._path)
 
-        elif isinstance(src, Image):
-            self._impl = self.factory.Image(interface=self, data=src.data)
+            case Image():
+                self._impl = self.factory.Image(interface=self, data=src.data)
 
-        elif isinstance(src, self.factory.Image.RAW_TYPE):
-            self._impl = self.factory.Image(interface=self, raw=src)
+            case self.factory.Image.RAW_TYPE():
+                self._impl = self.factory.Image(interface=self, raw=src)
 
-        else:
-            for converter in self._converters():
-                if isinstance(src, converter.image_class):
-                    data = converter.convert_from_format(src)
-                    self._impl = self.factory.Image(interface=self, data=data)
-                    return
+            case _:
+                for converter in self._converters():
+                    if isinstance(src, converter.image_class):
+                        data = converter.convert_from_format(src)
+                        self._impl = self.factory.Image(interface=self, data=data)
+                        return
 
-            raise TypeError("Unsupported source type for Image")
+                raise TypeError("Unsupported source type for Image")
 
     @classmethod
     @cache

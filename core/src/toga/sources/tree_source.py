@@ -240,12 +240,13 @@ class TreeSource(Source):
         data: object,
         children: object | None = None,
     ) -> Node:
-        if isinstance(data, Mapping):
-            node = Node(**data)
-        elif hasattr(data, "__iter__") and not isinstance(data, str):
-            node = Node(**dict(zip(self._accessors, data)))
-        else:
-            node = Node(**{self._accessors[0]: data})
+        match data:
+            case Mapping():
+                node = Node(**data)
+            case Iterable() if not isinstance(data, str):
+                node = Node(**dict(zip(self._accessors, data)))
+            case _:
+                node = Node(**{self._accessors[0]: data})
 
         node._parent = parent
         node._source = self

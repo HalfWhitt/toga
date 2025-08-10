@@ -122,12 +122,11 @@ class ImageView(Widget):
 
     @image.setter
     def image(self, image: ImageContentT) -> None:
-        if isinstance(image, toga.Image):
-            self._image = image
-        elif image is None:
-            self._image = None
-        else:
-            self._image = toga.Image(image)
+        match image:
+            case toga.Image() | None:
+                self._image = image
+            case _:
+                self._image = toga.Image(image)
 
         self._impl.set_image(self._image)
         self.refresh()

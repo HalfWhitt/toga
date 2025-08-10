@@ -16,10 +16,11 @@ from toga_iOS.libs import (
 def toga_color(color):
     if color:
         # Label color is a default foregroud value, equivalent to setting `color=None`
-        if color == UIColor.labelColor():
-            return None
-        elif color == UIColor.clearColor:
-            return TRANSPARENT
+        match color:
+            case UIColor.labelColor():
+                return None
+            case UIColor.clearColor:
+                return TRANSPARENT
 
         red = CGFloat()
         green = CGFloat()

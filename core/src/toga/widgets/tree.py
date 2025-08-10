@@ -142,12 +142,13 @@ class Tree(Widget):
 
     @data.setter
     def data(self, data: SourceT | object | None) -> None:
-        if data is None:
-            self._data = TreeSource(accessors=self._accessors, data=[])
-        elif isinstance(data, Source):
-            self._data = data
-        else:
-            self._data = TreeSource(accessors=self._accessors, data=data)
+        match data:
+            case None:
+                self._data = TreeSource(accessors=self._accessors, data=[])
+            case Source():
+                self._data = data
+            case _:
+                self._data = TreeSource(accessors=self._accessors, data=data)
 
         self._data.add_listener(self._impl)
         self._impl.change_source(source=self._data)

@@ -171,38 +171,31 @@ class Window(Container):
         if current_state == state:
             return
 
-        elif current_state != WindowState.NORMAL:
-            if current_state == WindowState.FULLSCREEN:
-                decor_view.setSystemUiVisibility(0)
-
-            else:  # current_state == WindowState.PRESENTATION:
-                decor_view.setSystemUiVisibility(0)
-                self.show_actionbar(True)
-                self._in_presentation_mode = False
-
-            self.set_window_state(state)
-
-        else:  # current_state == WindowState.NORMAL:
-            if state in {WindowState.MAXIMIZED, WindowState.MINIMIZED}:
-                # no-op on Android.
+        match current_state, state:
+            case _, WindowState.MAXIMIZED | WindowState.MINIMIZED:
+                # No-op on Android
                 pass
 
-            elif state == WindowState.FULLSCREEN:
+            case WindowState.FULLSCREEN | WindowState.PRESENTATION, _:
+                print("Leaving fullscreen / presentation")
+                # Deactivate current state, then call method again for new state
+                if current_state == WindowState.PRESENTATION:
+                    self.show_actionbar(True)
+                    self._in_presentation_mode = False
+
+                decor_view.setSystemUiVisibility(0)
+                self.set_window_state(state)
+
+            case WindowState.NORMAL, WindowState.FULLSCREEN | WindowState.PRESENTATION:
                 decor_view.setSystemUiVisibility(
                     # These constants are all marked as deprecated as of API 30.
                     decor_view.SYSTEM_UI_FLAG_FULLSCREEN
                     | decor_view.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                     | decor_view.SYSTEM_UI_FLAG_IMMERSIVE
                 )
-
-            else:  # state == WindowState.PRESENTATION:
-                decor_view.setSystemUiVisibility(
-                    decor_view.SYSTEM_UI_FLAG_FULLSCREEN
-                    | decor_view.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                    | decor_view.SYSTEM_UI_FLAG_IMMERSIVE
-                )
-                self.show_actionbar(False)
-                self._in_presentation_mode = True
+                if state == WindowState.PRESENTATION:
+                    self.show_actionbar(False)
+                    self._in_presentation_mode = True
 
     ######################################################################
     # Window capabilities

@@ -12,9 +12,10 @@ class Icon(LoggedObject):
         if self.ICON_FAILURE:
             raise self.ICON_FAILURE
         else:
-            if path is None:
-                self.path = "<APP ICON>"
-            elif path == {}:
-                raise FileNotFoundError("No image variants found")
-            else:
-                self.path = path
+            match path:
+                case None:
+                    self.path = "<APP ICON>"
+                case dict() if not path:
+                    raise FileNotFoundError("No image variants found")
+                case _:
+                    self.path = path

@@ -848,17 +848,16 @@ class App:
             not have content.
         """
         if windows:
-            screen_window_dict = {}
-            if isinstance(windows, list):
-                for window, screen in zip(windows, self.screens):
-                    screen_window_dict[screen] = window
-            elif isinstance(windows, dict):
-                screen_window_dict = windows
-            else:
-                raise ValueError(
-                    "Presentation layout should be a list of windows,"
-                    " or a dict mapping windows to screens."
-                )
+            match windows:
+                case list():
+                    screen_window_dict = dict(zip(self.screens, windows))
+                case dict():
+                    screen_window_dict = windows
+                case _:
+                    raise ValueError(
+                        "Presentation layout should be a list of windows,"
+                        " or a dict mapping windows to screens."
+                    )
 
             for screen, window in screen_window_dict.items():
                 window._impl._before_presentation_mode_screen = window.screen

@@ -156,18 +156,17 @@ class SimpleProbe(BaseProbe, FontMixin):
         return True
 
     async def type_character(self, char):
-        if char == "<esc>":
-            # There's no analog of esc on iOS
-            pass
-        elif char == "\n":
-            self.type_return()
-        else:
-            # Perform any prevalidation that is required. If the input isn't
-            # valid, do a dummy "empty" insertion.
-            valid = self._prevalidate_input(char)
-            if valid:
+        match char:
+            case "<esc>":
+                # There's no analog of esc on iOS
+                pass
+            case "\n":
+                self.type_return()
+            case _ if self._prevalidate_input(char):
+                # Insert after performing any required prevalidation.
                 self.native.insertText(char)
-            else:
+            case _:
+                # If the input isn't valid, do a dummy "empty" insertion.
                 self.native.insertText("")
 
     async def undo(self):

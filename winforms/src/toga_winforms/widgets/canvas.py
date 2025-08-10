@@ -108,17 +108,17 @@ class Canvas(Box):
 
     def winforms_mouse_down(self, obj, mouse_event):
         x, y = map(self.scale_out, (mouse_event.X, mouse_event.Y))
-        if mouse_event.Button == WinForms.MouseButtons.Left:
-            if mouse_event.Clicks == 2:
+        match mouse_event.Button:
+            case WinForms.MouseButtons.Left if mouse_event.Clicks == 2:
                 self.interface.on_activate(x, y)
-            else:
+            case WinForms.MouseButtons.Left:
                 self.interface.on_press(x, y)
                 self.dragging = True
-        elif mouse_event.Button == WinForms.MouseButtons.Right:
-            self.interface.on_alt_press(x, y)
-            self.dragging = True
-        else:  # pragma: no cover
-            pass
+            case WinForms.MouseButtons.Right:
+                self.interface.on_alt_press(x, y)
+                self.dragging = True
+            case _:  # pragma: no cover
+                pass
 
     def winforms_mouse_move(self, obj, mouse_event):
         if not self.dragging:
@@ -134,12 +134,13 @@ class Canvas(Box):
     def winforms_mouse_up(self, obj, mouse_event):
         self.dragging = False
         x, y = map(self.scale_out, (mouse_event.X, mouse_event.Y))
-        if mouse_event.Button == WinForms.MouseButtons.Left:
-            self.interface.on_release(x, y)
-        elif mouse_event.Button == WinForms.MouseButtons.Right:
-            self.interface.on_alt_release(x, y)
-        else:  # pragma: no cover
-            pass
+        match mouse_event.Button:
+            case WinForms.MouseButtons.Left:
+                self.interface.on_release(x, y)
+            case WinForms.MouseButtons.Right:
+                self.interface.on_alt_release(x, y)
+            case _:  # pragma: no cover
+                pass
 
     def redraw(self):
         self.native.Invalidate()
@@ -328,15 +329,16 @@ class Canvas(Box):
         scaled_line_height = self._line_height(font, line_height)
         total_height = scaled_line_height * len(lines)
 
-        if baseline == Baseline.TOP:
-            top = y
-        elif baseline == Baseline.MIDDLE:
-            top = y - (total_height / 2)
-        elif baseline == Baseline.BOTTOM:
-            top = y - total_height
-        else:
-            # Default to Baseline.ALPHABETIC
-            top = y - font.metric("CellAscent")
+        match baseline:
+            case Baseline.TOP:
+                top = y
+            case Baseline.MIDDLE:
+                top = y - (total_height / 2)
+            case Baseline.BOTTOM:
+                top = y - total_height
+            case _:
+                # Default to Baseline.ALPHABETIC
+                top = y - font.metric("CellAscent")
 
         for line_num, line in enumerate(lines):
             draw_context.current_path.AddString(

@@ -146,8 +146,8 @@ class Window(LoggedObject):
         previous_state = self._state
 
         self._action(f"set window state to {state}", state=state)
-        self._state = state
-        current_state = self._state
+        current_state = self._state = state
+
         if previous_state != current_state:
             if previous_state == WindowState.MINIMIZED:
                 self.interface.on_show()

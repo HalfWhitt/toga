@@ -303,8 +303,7 @@ class Canvas(Widget):
                 top = y + font.native.ascender - (total_height / 2)
             case Baseline.BOTTOM:
                 top = y + font.native.ascender - total_height
-            case _:
-                # Default to Baseline.ALPHABETIC
+            case Baseline.ALPHABETIC:
                 top = y
 
         for line_num, line in enumerate(lines):

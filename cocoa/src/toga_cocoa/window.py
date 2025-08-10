@@ -374,13 +374,13 @@ class Window:
     def get_window_state(self, in_progress_state=False):
         if in_progress_state and self._pending_state_transition:
             return self._pending_state_transition
-        if bool(self.container.native.isInFullScreenMode()):
+        if self.container.native.isInFullScreenMode():
             return WindowState.PRESENTATION
-        elif bool(self.native.styleMask & NSWindowStyleMask.FullScreen):
+        elif self.native.styleMask & NSWindowStyleMask.FullScreen:
             return WindowState.FULLSCREEN
-        elif bool(self.native.isZoomed):
+        elif self.native.isZoomed:
             return WindowState.MAXIMIZED
-        elif bool(self.native.isMiniaturized):
+        elif self.native.isMiniaturized:
             return WindowState.MINIMIZED
         else:
             return WindowState.NORMAL
@@ -403,20 +403,21 @@ class Window:
 
         if self._pending_state_transition:
             self._pending_state_transition = state
-        else:
-            # If the app is in presentation mode, but this window isn't, then
-            # exit app presentation mode before setting the requested state.
-            if any(
-                window.state == WindowState.PRESENTATION and window != self.interface
-                for window in self.interface.app.windows
-            ):
-                self.interface.app.exit_presentation_mode()
+            return
 
-            self._pending_state_transition = state
-            if self.get_window_state() != WindowState.NORMAL:
-                self._apply_state(WindowState.NORMAL)
-            else:
-                self._apply_state(state)
+        # If the app is in presentation mode, but this window isn't, then exit app
+        # presentation mode before setting the requested state.
+        if any(
+            window.state == WindowState.PRESENTATION and window != self.interface
+            for window in self.interface.app.windows
+        ):
+            self.interface.app.exit_presentation_mode()
+
+        self._pending_state_transition = state
+        if self.get_window_state() != WindowState.NORMAL:
+            self._apply_state(WindowState.NORMAL)
+        else:
+            self._apply_state(state)
 
     def _apply_state(self, target_state):
         if target_state is None:

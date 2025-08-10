@@ -55,8 +55,8 @@ class Command:
 
     @classmethod
     def standard(cls, app, id):
-        # ---- App menu -----------------------------------
         match id:
+            # ---- App menu -----------------------------------
             case StandardCommand.ABOUT:
                 # About should be the first menu item
                 return {

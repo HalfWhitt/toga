@@ -336,8 +336,7 @@ class Canvas(Box):
                 top = y - (total_height / 2)
             case Baseline.BOTTOM:
                 top = y - total_height
-            case _:
-                # Default to Baseline.ALPHABETIC
+            case Baseline.ALPHABETIC:
                 top = y - font.metric("CellAscent")
 
         for line_num, line in enumerate(lines):

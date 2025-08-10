@@ -287,7 +287,7 @@ class Window(Container, Scalable):
                     return WindowState.MAXIMIZED
             case WinForms.FormWindowState.Minimized:
                 return WindowState.MINIMIZED
-            case _:  # WinForms.FormWindowState.Normal:
+            case WinForms.FormWindowState.Normal:
                 return WindowState.NORMAL
 
     def set_window_state(self, state):
@@ -328,26 +328,26 @@ class Window(Container, Scalable):
                 self._in_presentation_mode = True
                 return
 
-            case WindowState.PRESENTATION, _:
-                if self.native.MainMenuStrip:
-                    self.native.MainMenuStrip.Visible = True
-                if getattr(self, "toolbar_native", None):
-                    self.toolbar_native.Visible = True
+            case _:
+                # All transitions that *aren't* leaving normal, with an extra bit if
+                # we're leaving presentation.
+                if current_state == WindowState.PRESENTATION:
+                    if self.native.MainMenuStrip:
+                        self.native.MainMenuStrip.Visible = True
+                    if getattr(self, "toolbar_native", None):
+                        self.toolbar_native.Visible = True
 
-                self.interface.screen = self._before_presentation_mode_screen
-                del self._before_presentation_mode_screen
-                self._in_presentation_mode = False
-                # (And then also do the section below)
+                    self.interface.screen = self._before_presentation_mode_screen
+                    del self._before_presentation_mode_screen
+                    self._in_presentation_mode = False
 
-        # Applies to all state changes that *aren't* changing out of normal.
-        # Reset to normal and call this method again with the target state.
-        self.native.FormBorderStyle = getattr(
-            WinForms.FormBorderStyle,
-            "Sizable" if self.interface.resizable else "FixedSingle",
-        )
-        self.native.WindowState = WinForms.FormWindowState.Normal
+                self.native.FormBorderStyle = getattr(
+                    WinForms.FormBorderStyle,
+                    "Sizable" if self.interface.resizable else "FixedSingle",
+                )
+                self.native.WindowState = WinForms.FormWindowState.Normal
 
-        self.set_window_state(state)
+                self.set_window_state(state)
 
     ######################################################################
     # Window capabilities

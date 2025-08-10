@@ -322,30 +322,29 @@ class Window:
         return WindowState.NORMAL
 
     def set_window_state(self, state):
-        if IS_WAYLAND and (
-            state == WindowState.MINIMIZED
-        ):  # pragma: no-cover-if-linux-x
+        if IS_WAYLAND and (state == WindowState.MINIMIZED):
+            # pragma: no-cover-if-linux-x
             # Not implemented on wayland due to wayland interpretation of an app's
             # responsibility.
             return
-        else:
-            if self._pending_state_transition:
-                self._pending_state_transition = state
-            else:
-                # If the app is in presentation mode, but this window isn't, then
-                # exit app presentation mode before setting the requested state.
-                if any(
-                    window.state == WindowState.PRESENTATION
-                    and window != self.interface
-                    for window in self.interface.app.windows
-                ):
-                    self.interface.app.exit_presentation_mode()
 
-                self._pending_state_transition = state
-                if self.get_window_state() != WindowState.NORMAL:
-                    self._apply_state(WindowState.NORMAL)
-                else:
-                    self._apply_state(state)
+        if self._pending_state_transition:
+            self._pending_state_transition = state
+            return
+
+        # If the app is in presentation mode, but this window isn't, then exit app
+        # presentation mode before setting the requested state.
+        if any(
+            window.state == WindowState.PRESENTATION and window != self.interface
+            for window in self.interface.app.windows
+        ):
+            self.interface.app.exit_presentation_mode()
+
+        self._pending_state_transition = state
+        if self.get_window_state() != WindowState.NORMAL:
+            self._apply_state(WindowState.NORMAL)
+        else:
+            self._apply_state(state)
 
     def _apply_state(self, target_state):
         if target_state is None:  # pragma: no cover

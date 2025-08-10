@@ -177,7 +177,6 @@ class Window(Container):
                 pass
 
             case WindowState.FULLSCREEN | WindowState.PRESENTATION, _:
-                print("Leaving fullscreen / presentation")
                 # Deactivate current state, then call method again for new state
                 if current_state == WindowState.PRESENTATION:
                     self.show_actionbar(True)

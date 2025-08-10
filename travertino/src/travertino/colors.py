@@ -304,7 +304,7 @@ def color(value: str) -> Color:
         case str() if all(d in string.hexdigits for d in value[1:]):
             match list(value):
                 case "#", r1, g1, b1:
-                    r2, g2, b2, value = r1, g1, b1, value
+                    r2, g2, b2 = r1, g1, b1
                     a1 = a2 = "FF"
                 case "#", r1, g1, b1, a1:
                     r2, g2, b2, a2 = r1, g1, b1, a1

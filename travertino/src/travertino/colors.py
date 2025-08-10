@@ -296,35 +296,33 @@ def color(value: str) -> Color:
     * '#rrggbb'
     * '#rrggbbaa'
     """
-
-    if isinstance(value, Color):
-        return value
-
-    elif isinstance(value, str):
-        if result := NAMED_COLOR.get(value.lower()):
+    match value:
+        case Color():
+            return value
+        case str() if result := NAMED_COLOR.get(value.lower()):
             return result
+        case str() if all(d in string.hexdigits for d in value[1:]):
+            match list(value):
+                case "#", r1, g1, b1:
+                    r2, g2, b2, value = r1, g1, b1, value
+                    a1 = a2 = "FF"
+                case "#", r1, g1, b1, a1:
+                    r2, g2, b2, a2 = r1, g1, b1, a1
+                case "#", r1, r2, g1, g2, b1, b2:
+                    a1 = a2 = "FF"
+                case "#", r1, r2, g1, g2, b1, b2, a1, a2:
+                    pass
+                case _:
+                    raise ValueError(f"Unknown color: {value!r}")
 
-        pound, *digits = value
-        if pound == "#" and all(d in string.hexdigits for d in digits):
-            if len(digits) in {3, 4}:
-                r, g, b, *a = digits
-                return rgb(
-                    r=int(f"{r}{r}", 16),
-                    g=int(f"{g}{g}", 16),
-                    b=int(f"{b}{b}", 16),
-                    a=(int(f"{a[0]}{a[0]}", 16) / 0xFF) if a else 1.0,
-                )
-
-            elif len(digits) in {6, 8}:
-                r1, r2, g1, g2, b1, b2, *a = digits
-                return rgb(
-                    r=int(f"{r1}{r2}", 16),
-                    g=int(f"{g1}{g2}", 16),
-                    b=int(f"{b1}{b2}", 16),
-                    a=(int(f"{a[0]}{a[1]}", 16) / 0xFF) if a else 1.0,
-                )
-
-    raise ValueError(f"Unknown color: {value!r}")
+            return rgb(
+                r=int(f"{r1}{r2}", 16),
+                g=int(f"{g1}{g2}", 16),
+                b=int(f"{b1}{b2}", 16),
+                a=int(f"{a1}{a2}", 16) / 0xFF,
+            )
+        case _:
+            raise ValueError(f"Unknown color: {value!r}")
 
 
 NAMED_COLOR = {

@@ -856,7 +856,7 @@ class App:
                 case _:
                     raise ValueError(
                         "Presentation layout should be a list of windows,"
-                        " or a dict mapping windows to screens."
+                        " or a dict mapping screens to their windows."
                     )
 
             for screen, window in screen_window_dict.items():

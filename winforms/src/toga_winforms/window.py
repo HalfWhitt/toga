@@ -287,7 +287,7 @@ class Window(Container, Scalable):
                     return WindowState.MAXIMIZED
             case WinForms.FormWindowState.Minimized:
                 return WindowState.MINIMIZED
-            case _:  # window_state == WinForms.FormWindowState.Normal:
+            case _:  # WinForms.FormWindowState.Normal:
                 return WindowState.NORMAL
 
     def set_window_state(self, state):

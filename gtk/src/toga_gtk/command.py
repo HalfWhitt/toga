@@ -89,8 +89,8 @@ class Command:
                     "group": Group.HELP,
                     "section": sys.maxsize,
                 }
-
-        raise ValueError(f"Unknown standard command {id!r}")
+            case _:
+                raise ValueError(f"Unknown standard command {id!r}")
 
     def gtk_activate(self, action, data=None):
         self.interface.action()

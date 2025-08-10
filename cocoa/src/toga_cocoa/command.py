@@ -127,8 +127,8 @@ class Command:
                     "enabled": app.home_page is not None,
                     "group": Group.HELP,
                 }
-
-        raise ValueError(f"Unknown standard command {id!r}")
+            case _:
+                raise ValueError(f"Unknown standard command {id!r}")
 
     def set_enabled(self, value):
         for item in self.native:

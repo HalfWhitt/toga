@@ -73,8 +73,8 @@ class Command(LoggedObject):
                 # This lets us verify the "platform doesn't support command"
                 # logic.
                 return None
-
-        raise ValueError(f"Unknown standard command {id!r}")
+            case _:
+                raise ValueError(f"Unknown standard command {id!r}")
 
     def set_enabled(self, value):
         self._action("set enabled", value=value)

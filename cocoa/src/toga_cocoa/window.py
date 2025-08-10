@@ -432,20 +432,20 @@ class Window:
             self._pending_state_transition = None
             return
 
-        match target_state:
-            case WindowState.MAXIMIZED:
+        match current_state, target_state:
+            case _, WindowState.MAXIMIZED:
                 self.native.setIsZoomed(True)
                 # No need to check for other pending states,
                 # since this is fully applied at this point.
                 self._pending_state_transition = None
 
-            case WindowState.MINIMIZED:
+            case _, WindowState.MINIMIZED:
                 self.native.setIsMiniaturized(True)
 
-            case WindowState.FULLSCREEN:
+            case _, WindowState.FULLSCREEN:
                 self.native.toggleFullScreen(self.native)
 
-            case WindowState.PRESENTATION:
+            case _, WindowState.PRESENTATION:
                 self._before_presentation_mode_screen = self.interface.screen
                 opts = NSMutableDictionary.alloc().init()
                 opts.setObject(
@@ -474,31 +474,29 @@ class Window:
                 # since this is fully applied at this point.
                 self._pending_state_transition = None
 
-            case WindowState.NORMAL:
-                match current_state:
-                    case WindowState.MAXIMIZED:
-                        self.native.setIsZoomed(False)
-                        self._apply_state(self._pending_state_transition)
+            case WindowState.MAXIMIZED, WindowState.NORMAL:
+                self.native.setIsZoomed(False)
+                self._apply_state(self._pending_state_transition)
 
-                    case WindowState.MINIMIZED:
-                        self.native.setIsMiniaturized(False)
+            case WindowState.MINIMIZED, WindowState.NORMAL:
+                self.native.setIsMiniaturized(False)
 
-                    case WindowState.FULLSCREEN:
-                        self.native.toggleFullScreen(self.native)
+            case WindowState.FULLSCREEN, WindowState.NORMAL:
+                self.native.toggleFullScreen(self.native)
 
-                    case WindowState.PRESENTATION:
-                        opts = NSMutableDictionary.alloc().init()
-                        opts.setObject(
-                            NSNumber.numberWithBool(True),
-                            forKey="NSFullScreenModeAllScreens",
-                        )
-                        self.container.native.exitFullScreenModeWithOptions(opts)
-                        self.interface.content.refresh()
+            case WindowState.PRESENTATION, WindowState.NORMAL:
+                opts = NSMutableDictionary.alloc().init()
+                opts.setObject(
+                    NSNumber.numberWithBool(True),
+                    forKey="NSFullScreenModeAllScreens",
+                )
+                self.container.native.exitFullScreenModeWithOptions(opts)
+                self.interface.content.refresh()
 
-                        self.interface.screen = self._before_presentation_mode_screen
-                        del self._before_presentation_mode_screen
+                self.interface.screen = self._before_presentation_mode_screen
+                del self._before_presentation_mode_screen
 
-                        self._apply_state(self._pending_state_transition)
+                self._apply_state(self._pending_state_transition)
 
     ######################################################################
     # Window capabilities

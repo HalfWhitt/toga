@@ -25,16 +25,18 @@ def _find_item(
 
     for item in candidates[start_index:]:
         try:
-            if isinstance(data, Mapping):
-                found = all(
-                    getattr(item, attr) == value for attr, value in data.items()
-                )
-            elif hasattr(data, "__iter__") and not isinstance(data, str):
-                found = all(
-                    getattr(item, attr) == value for value, attr in zip(data, accessors)
-                )
-            else:
-                found = getattr(item, accessors[0]) == data
+            match data:
+                case Mapping():
+                    found = all(
+                        getattr(item, attr) == value for attr, value in data.items()
+                    )
+                case Iterable() if not isinstance(data, str):
+                    found = all(
+                        getattr(item, attr) == value
+                        for value, attr in zip(data, accessors)
+                    )
+                case _:
+                    found = getattr(item, accessors[0]) == data
 
             if found:
                 return item

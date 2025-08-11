@@ -77,8 +77,8 @@ class Location:
         """
         result = PermissionResult(None)
 
-        if has_permission := self.has_permission:
-            result.set_result(has_permission)
+        if self.has_permission:
+            result.set_result(True)
         else:
             self._impl.request_permission(result)
 
@@ -117,17 +117,18 @@ class Location:
             permission to use location services.
         """
         result = PermissionResult(None)
-        if not self.has_permission:
-            result.set_exception(
-                PermissionError(
-                    "Cannot ask for background location permission "
-                    "before confirming foreground location permission."
+        match self.has_permission, self.has_background_permission:
+            case False, _:
+                result.set_exception(
+                    PermissionError(
+                        "Cannot ask for background location permission "
+                        "before confirming foreground location permission."
+                    )
                 )
-            )
-        elif has_background_permission := self.has_background_permission:
-            result.set_result(has_background_permission)
-        else:
-            self._impl.request_background_permission(result)
+            case True, False:
+                self._impl.request_background_permission(result)
+            case True, True:
+                result.set_result(True)
 
         return result
 

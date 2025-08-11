@@ -56,10 +56,11 @@ class App:
         pass
 
     def set_main_window(self, window):
-        if window is None:
-            raise RuntimeError("Session-based apps are not supported on Web")
-        elif window == toga.App.BACKGROUND:
-            raise RuntimeError("Background apps are not supported on Web")
+        match window:
+            case None:
+                raise RuntimeError("Session-based apps are not supported on Web")
+            case toga.App.BACKGROUND:
+                raise RuntimeError("Background apps are not supported on Web")
 
     ######################################################################
     # App resources

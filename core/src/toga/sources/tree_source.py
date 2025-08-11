@@ -257,18 +257,19 @@ class TreeSource(Source):
         return node
 
     def _create_nodes(self, parent: Node | None, value: object) -> list[Node]:
-        if isinstance(value, Mapping):
-            return [
-                self._create_node(parent=parent, data=data, children=children)
-                for data, children in value.items()
-            ]
-        elif hasattr(value, "__iter__") and not isinstance(value, str):
-            return [
-                self._create_node(parent=parent, data=item[0], children=item[1])
-                for item in value
-            ]
-        else:
-            return [self._create_node(parent=parent, data=value)]
+        match value:
+            case Mapping():
+                return [
+                    self._create_node(parent=parent, data=data, children=children)
+                    for data, children in value.items()
+                ]
+            case Iterable() if not isinstance(value, str):
+                return [
+                    self._create_node(parent=parent, data=item[0], children=item[1])
+                    for item in value
+                ]
+            case _:
+                return [self._create_node(parent=parent, data=value)]
 
     ######################################################################
     # Utility methods to make TreeSources more list-like

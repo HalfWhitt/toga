@@ -424,8 +424,8 @@ class Window:
             return
 
         current_state = self.get_window_state()
-        # Although same state check is done at the core, yet this is required
-        # Since, _apply_state() is called internally on the implementation
+        # Although this same state check is done at the core, this is still required,
+        # since _apply_state() is called internally on the implementation
         # side, after the completion of non-blocking APIs(setIsMiniaturized,
         # toggleFullScreen), by the delegate. Then this same state check is
         # used to terminate further processing.

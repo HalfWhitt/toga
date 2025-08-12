@@ -33,8 +33,8 @@ class TogaRow(GObject.Object):
                     stacklevel=2,
                 )
                 text = None
-            case tuple():
-                text = data[1]
+            case _, text:
+                pass
             case _:
                 text = data
 

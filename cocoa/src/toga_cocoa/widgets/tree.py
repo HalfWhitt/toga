@@ -75,10 +75,10 @@ class TogaTree(NSOutlineView):
                 case toga.Widget():
                     # If the value is a widget itself, just draw the widget!
                     return value._impl.native
-                case tuple():
+                case icon, value:
                     # Allow for an (icon, value) tuple as the simple case for encoding
                     # an icon in a table cell. Otherwise, look for an icon attribute.
-                    icon, value = value
+                    pass
                 case _:
                     try:
                         icon = value.icon

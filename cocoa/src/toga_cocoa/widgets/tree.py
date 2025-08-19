@@ -80,10 +80,7 @@ class TogaTree(NSOutlineView):
                     # an icon in a table cell. Otherwise, look for an icon attribute.
                     pass
                 case _:
-                    try:
-                        icon = value.icon
-                    except AttributeError:
-                        icon = None
+                    icon = getattr(value, "icon", None)
 
         # Creates a NSTableCellView from interface-builder template (does not exist)
         # or reuses an existing view which is currently not needed for painting

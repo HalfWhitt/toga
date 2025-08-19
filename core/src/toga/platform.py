@@ -44,6 +44,10 @@ def find_backends():
     return sorted(set(entry_points(group="toga.backends")))
 
 
+def _backends_list(backends):
+    return ", ".join(f"{backend.value!r} ({backend.name})" for backend in backends)
+
+
 @cache
 def get_platform_factory() -> ModuleType:
     """Determine the current host platform and import the platform factory.
@@ -86,26 +90,23 @@ def get_platform_factory() -> ModuleType:
                     for backend in toga_backends
                     if backend.name == current_platform
                 ]
-                toga_backends_string = ", ".join(
-                    f"{backend.value!r} ({backend.name})" for backend in toga_backends
-                )
                 match len(matching_backends):
                     case 0:
                         raise RuntimeError(
                             f"Multiple Toga backends are installed "
-                            f"({toga_backends_string}), but none of them match your "
-                            f"current platform ({current_platform!r}). Install a "
-                            f"backend for your current platform, or use TOGA_BACKEND "
-                            f"to specify a backend."
+                            f"({_backends_list(toga_backends)}), but none of them "
+                            f"match your current platform ({current_platform!r}). "
+                            f"Install a backend for your current platform, or use "
+                            f"TOGA_BACKEND to specify a backend."
                         )
                     case 1:
                         backend = matching_backends[0]
                     case _:
                         raise RuntimeError(
                             f"Multiple candidate toga backends found: "
-                            f"({toga_backends_string}). "
-                            f"Uninstall the backends you don't require, or use "
-                            f"TOGA_BACKEND to specify a backend."
+                            f"({_backends_list(matching_backends)}). Uninstall the "
+                            f"backends you don't require, or use TOGA_BACKEND to "
+                            f"specify a backend."
                         )
         factory = importlib.import_module(f"{backend.value}.factory")
     return factory

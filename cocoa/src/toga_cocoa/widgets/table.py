@@ -50,13 +50,8 @@ class TogaTable(NSTableView):
                 # icon in a table cell. Otherwise, look for an icon attribute.
                 pass
             case _:
-                try:
-                    icon = value.icon
-                except AttributeError:
-                    icon = None
-
-        if value is None:
-            value = self.interface.missing_value
+                icon = getattr(value, "icon", None)
+                value = self.interface.missing_value
 
         # creates a NSTableCellView from interface-builder template (does not exist)
         # or reuses an existing view which is currently not needed for painting

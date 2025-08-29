@@ -322,8 +322,7 @@ class Window:
         return WindowState.NORMAL
 
     def set_window_state(self, state):
-        if IS_WAYLAND and (state == WindowState.MINIMIZED):
-            # pragma: no-cover-if-linux-x
+        if IS_WAYLAND and state == WindowState.MINIMIZED:  # pragma: no-cover-if-linux-x
             # Not implemented on wayland due to wayland interpretation of an app's
             # responsibility.
             return

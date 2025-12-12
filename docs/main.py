@@ -8,8 +8,9 @@ import yaml
 from tabulate import tabulate
 
 
-def slugify(string):
-    return string.lower().replace(" ", "")
+def slugify(string, sep="-"):
+    string = "".join(f"{sep}{char}" if char.isupper() else char for char in string)
+    return string.lstrip(sep).lower().replace(" ", sep)
 
 
 PLATFORMS_MAPPING = {
@@ -30,12 +31,10 @@ APIS_BY_NAME = {}
 APIS_BY_CATEGORY = defaultdict(list)
 
 for category_name, category_contents in api_data.items():
-    category_path = Path(category_contents.pop("path"))
+    category_path = Path(slugify(category_name))
     for component_name, component in category_contents.items():
-        if str_path := component.get("path"):
-            path = Path(str_path)
-        else:
-            path = category_path / f"{slugify(component_name)}.md"
+        file_name = component.get("file_name", slugify(component_name, sep=""))
+        path = category_path / f"{file_name}.md"
 
         unsupported = component.get("unsupported", [])
         beta = component.get("beta", [])
@@ -118,15 +117,23 @@ def define_env(env):
     def api_table(category, platforms=False):
         """Render table of a category of APIs for the two reference pages."""
         components = APIS_BY_CATEGORY[category]
-        rows = [
-            {"Component": component["link_from_platforms"], **component["platforms"]}
-            if platforms
-            else {
-                "Component": component["link"],
-                "Description": component["description"],
-            }
-            for component in components
-        ]
+        if platforms:
+            rows = [
+                {
+                    "Component": component["link_from_platforms"],
+                    **component["platforms"],
+                }
+                for component in components
+                if not component["display"] == "hide"
+            ]
+        else:
+            rows = [
+                {
+                    "Component": component["link"],
+                    "Description": component["description"],
+                }
+                for component in components
+            ]
         return tabulate(rows, headers="keys", tablefmt="github")
 
     @env.macro

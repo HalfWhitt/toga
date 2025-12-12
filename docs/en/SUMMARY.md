@@ -40,42 +40,25 @@
     - ./topics/*
 - [Reference](reference/index.md)
     - [API Reference](reference/api/index.md)
-        - [App](./reference/api/app.md)
-        - [Window](./reference/api/window.md)
-        - [MainWindow](./reference/api/mainwindow.md)
-        - [DocumentWindow](./reference/api/documentwindow.md)
-        - Containers
-            - ./reference/api/containers/*
-        - Hardware
-            - ./reference/api/hardware/*
+        - Application components
+            <!-- Specify order of the window classes, then let rest be alphabetical -->
+            - [App](reference/api/application-components/app.md)
+            - [Window](reference/api/application-components/window.md)
+            - [MainWindow](reference/api/application-components/mainwindow.md)
+            - [DocumentWindow](reference/api/application-components/documentwindow.md)
+            - reference/api/application-components/*
+        - General widgets
+            - reference/api/general-widgets/*
+        - Layout widgets
+            - reference/api/layout-widgets/*
         - Resources
-            - ./reference/api/resources/*
-        - Widgets
-            - [ActivityIndicator](./reference/api/widgets/activityindicator.md)
-            - [Button](./reference/api/widgets/button.md)
-            - [Canvas](./reference/api/widgets/canvas.md)
-            - [DateInput](./reference/api/widgets/dateinput.md)
-            - [DetailedList](./reference/api/widgets/detailedlist.md)
-            - [Divider](./reference/api/widgets/divider.md)
-            - [ImageView](./reference/api/widgets/imageview.md)
-            - [Label](./reference/api/widgets/label.md)
-            - [MapView](./reference/api/widgets/mapview.md)
-            - [MultilineTextInput](./reference/api/widgets/multilinetextinput.md)
-            - [NumberInput](./reference/api/widgets/numberinput.md)
-            - [PasswordInput](./reference/api/widgets/passwordinput.md)
-            - [ProgressBar](./reference/api/widgets/progressbar.md)
-            - [Selection](./reference/api/widgets/selection.md)
-            - [Slider](./reference/api/widgets/slider.md)
-            - [Switch](./reference/api/widgets/switch.md)
-            - [Table](./reference/api/widgets/table.md)
-            - [TextInput](./reference/api/widgets/textinput.md)
-            - [TimeInput](./reference/api/widgets/timeinput.md)
-            - [Tree](./reference/api/widgets/tree.md)
-            - [WebView](./reference/api/widgets/webview.md)
-            - [Widget](./reference/api/widgets/widget.md)
-        - [Constants](./reference/api/constants.md)
-        - [Keys](./reference/api/keys.md)
-        - [Types](./reference/api/types.md)
+            - reference/api/resources/*
+        - Data sources
+            - reference/api/data-sources/*
+        - Hardware
+            - reference/api/hardware/*
+        - Other
+            - ./reference/api/other/*
     - [Supported Platforms](reference/platforms/index.md)
         - [macOS](./reference/platforms/macOS.md)
         - [Windows](./reference/platforms/windows.md)
@@ -87,11 +70,11 @@
         - [Web](./reference/platforms/web.md)
         - [Terminal](./reference/platforms/terminal.md)
         - [Testing](./reference/platforms/testing.md)
-    - [Toga APIs by platform](reference/widgets_by_platform.md)
+    - [Toga APIs by platform](reference/apis-by-platform.md)
     - Style
         - [The Pack Style Engine](reference/style/pack.md)
     - Plugins
-        - [Image Format Plugins](reference/plugins/image_formats.md)
+        - [Image Format Plugins](reference/plugins/image-format-plugins.md)
     - Toga's internals
         - [Architecture](reference/internals/architecture.md)
 - [About Toga](about/index.md)

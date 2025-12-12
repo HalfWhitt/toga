@@ -130,3 +130,81 @@ plugins:
             show_symbol_type_heading: true  # Enables type symbols next to object names in content
             show_attribute_values: false  # Suppresses the values of attributes in the signature
             heading_level: 3  # Heading level of 3 to nest under References heading
+  exclude:
+    glob:
+      - reference/api/general-widgets/snippets/*
+  redirects:
+    redirect_maps:
+      # Neither of these was ever linked to, but they are in the sitemap for 0.5.3.
+      reference/api/widgets/table-accessors/: reference/api/general-widgets/table.md
+      reference/api/widgets/table-values/: reference/api/general-widgets/table.md
+
+      reference/plugins/image_formats.md: reference/plugins/image-format-plugins.md
+
+      ### API
+
+      # Application components
+      reference/api/app.md: reference/api/application-components/app.md
+      reference/api/window.md: reference/api/application-components/window.md
+      reference/api/mainwindow.md: reference/api/application-components/mainwindow.md
+      reference/api/documentwindow.md: reference/api/application-components/documentwindow.md
+      reference/api/resources/command.md: reference/api/application-components/command.md
+      reference/api/resources/dialogs.md: reference/api/application-components/dialogs.md
+      reference/api/resources/statusicons.md: reference/api/application-components/status-icons.md
+
+      # General widgets
+      reference/api/widgets/activityindicator.md: reference/api/general-widgets/activityindicator.md
+      reference/api/widgets/button.md: reference/api/general-widgets/button.md
+      reference/api/widgets/canvas.md: reference/api/general-widgets/canvas.md
+      reference/api/widgets/dateinput.md: reference/api/general-widgets/dateinput.md
+      reference/api/widgets/detailedlist.md: reference/api/general-widgets/detailedlist.md
+      reference/api/widgets/divider.md: reference/api/general-widgets/divider.md
+      reference/api/widgets/imageview.md: reference/api/general-widgets/imageview.md
+      reference/api/widgets/label.md: reference/api/general-widgets/label.md
+      reference/api/widgets/mapview.md: reference/api/general-widgets/mapview.md
+      reference/api/widgets/multilinetextinput.md: reference/api/general-widgets/multilinetextinput.md
+      reference/api/widgets/numberinput.md: reference/api/general-widgets/numberinput.md
+      reference/api/widgets/passwordinput.md: reference/api/general-widgets/passwordinput.md
+      reference/api/widgets/progressbar.md: reference/api/general-widgets/progressbar.md
+      reference/api/widgets/selection.md: reference/api/general-widgets/selection.md
+      reference/api/widgets/slider.md: reference/api/general-widgets/slider.md
+      reference/api/widgets/switch.md: reference/api/general-widgets/switch.md
+      reference/api/widgets/table.md: reference/api/general-widgets/table.md
+      reference/api/widgets/textinput.md: reference/api/general-widgets/textinput.md
+      reference/api/widgets/timeinput.md: reference/api/general-widgets/timeinput.md
+      reference/api/widgets/tree.md: reference/api/general-widgets/tree.md
+      reference/api/widgets/webview.md: reference/api/general-widgets/webview.md
+      reference/api/widgets/widget.md: reference/api/general-widgets/widget.md
+
+      # Layout widgets
+      reference/api/containers/box.md: reference/api/layout-widgets/box.md
+      reference/api/containers/optioncontainer.md: reference/api/layout-widgets/optioncontainer.md
+      reference/api/containers/scrollcontainer.md: reference/api/layout-widgets/scrollcontainer.md
+      reference/api/containers/splitcontainer.md: reference/api/layout-widgets/splitcontainer.md
+
+      # Resources
+      reference/api/resources/fonts.md: reference/api/resources/font.md
+      reference/api/resources/icons.md: reference/api/resources/icon.md
+      reference/api/resources/images.md: reference/api/resources/image.md
+      # resources/document.md unchanged
+
+      # Data sources
+      reference/api/resources/sources/source.md: reference/api/data-sources/source.md
+      reference/api/resources/sources/list_source.md: reference/api/data-sources/listsource.md
+      reference/api/resources/sources/tree_source.md: reference/api/data-sources/treesource.md
+      reference/api/resources/sources/value_source.md: reference/api/data-sources/valuesource.md
+
+      # Hardware
+      # hardware/camera.md unchanged
+      reference/api/keys.md: reference/api/hardware/keys.md
+      # hardware/location.md unchanged
+      reference/api/hardware/screens.md: reference/api/hardware/screen.md
+
+      # Other
+      reference/api/resources/app_paths.md: reference/api/other/paths.md
+      reference/api/constants.md: reference/api/other/constants.md
+      reference/api/types.md: reference/api/other/types.md
+      reference/api/resources/validators.md: reference/api/other/validators.md
+
+      # By platform
+      reference/widgets_by_platform.md: reference/apis-by-platform.md

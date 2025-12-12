@@ -1,10 +1,11 @@
 # API Reference
 
 {% for category in [
-	"Core application components",
+	"Application components",
 	"General widgets",
 	"Layout widgets",
 	"Resources",
+	"Data sources",
 	"Hardware",
 	"Other"
 ] %}

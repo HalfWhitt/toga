@@ -1,6 +1,4 @@
-Core application components:
-  path: ''
-
+Application components:
   App:
     description: The top-level representation of an application.
     display: table
@@ -28,9 +26,34 @@ Core application components:
       - web
       - textual
 
-General widgets:
-  path: widgets
+  Command:
+    description: A representation of app functionality that the user can invoke from menus or toolbars.
+    display: table
+    unsupported:
+      - iOS
+      - web
+      - textual
 
+  Dialogs:
+    description: Short-lived windows asking the user for input.
+    display: table
+    beta:
+      - web
+      - textual
+      - qt
+
+  Status icons:
+    description: Icons that appear in the system tray for representing app status
+      while the app isn't visible.
+    file_name: status-icons
+    unsupported:
+      - iOS
+      - android
+      - web
+      - textual
+      - qt
+
+General widgets:
   ActivityIndicator:
     description: A small animated indicator showing activity on a task of indeterminate length, usually rendered as a "spinner" animation.
     beta:
@@ -190,8 +213,6 @@ General widgets:
     display: table
 
 Layout widgets:
-  path: containers
-
   Box:
     description: A generic container for other widgets. Used to construct layouts.
     beta:
@@ -224,37 +245,6 @@ Layout widgets:
       - qt
 
 Resources:
-  path: resources
-
-  App paths:
-    description: A mechanism for obtaining platform-appropriate filesystem locations for an application.
-    display: table
-    path: resources/app_paths.md
-    beta:
-      - textual
-    unsupported:
-      - web
-
-  Command:
-    description: A representation of app functionality that the user can invoke from menus or toolbars.
-    display: table
-    unsupported:
-      - iOS
-      - web
-      - textual
-
-  Color:
-    description: A representation of a color.
-    display: hide
-
-  Dialogs:
-    description: Short-lived windows asking the user for input.
-    display: table
-    beta:
-      - web
-      - textual
-      - qt
-
   Document:
     description: A representation of a file on disk that will be displayed in one or more windows.
     display: table
@@ -267,7 +257,6 @@ Resources:
   Font:
     description: A representation of a font.
     display: table
-    path: resources/fonts.md
     unsupported:
       - web
       - textual
@@ -275,7 +264,6 @@ Resources:
   Icon:
     description: A small, square image used to provide easily identifiable visual context to a widget.
     display: table
-    path: resources/icons.md
     beta:
       - textual
     unsupported:
@@ -284,48 +272,28 @@ Resources:
   Image:
     description: Graphical content of arbitrary size.
     display: table
-    path: resources/images.md
     unsupported:
       - web
       - textual
 
-  Status icons:
-    description: Icons that appear in the system tray for representing app status
-      while the app isn't visible.
-    unsupported:
-      - iOS
-      - android
-      - web
-      - textual
-      - qt
-
+Data sources:
   Source:
     description: A base class for data source implementations.
     display: hide
-    path: resources/sources/source.md
 
   ListSource:
     description: A data source describing an ordered list of data.
     display: hide
-    path: resources/sources/list_source.md
 
   TreeSource:
     description: A data source describing an ordered hierarchical tree of data.
     display: hide
-    path: resources/sources/tree_source.md
 
   ValueSource:
     description: A data source describing a single value.
     display: hide
-    path: resources/sources/value_source.md
-
-  Validators:
-    description: Mechanisms for validating that input meets a given set of criteria.
-    display: hide
 
 Hardware:
-  path: hardware
-
   Camera:
     description: A sensor that can capture photos and/or video.
     display: table
@@ -336,10 +304,13 @@ Hardware:
       - textual
       - qt
 
-  Location services:
+  Keys:
+    description: Symbolic representation of keys used for keyboard shortcuts.
+    display: hide
+
+  Location:
     description: A sensor that can capture the geographical location of the device.
     display: table
-    path: hardware/location.md
     unsupported:
       - winforms
       - web
@@ -349,22 +320,31 @@ Hardware:
   Screen:
     description: A representation of a screen attached to a device.
     display: table
-    path: hardware/screens.md
     beta:
       - web
       - textual
 
 Other:
-  path: ''
+  Color:
+    description: A representation of a color.
+    display: hide
 
   Constants:
     description: Symbolic constants used by various APIs.
     display: hide
 
-  Keys:
-    description: Symbolic representation of keys used for keyboard shortcuts.
-    display: hide
+  Paths:
+    description: A mechanism for obtaining platform-appropriate filesystem locations for an application.
+    display: table
+    beta:
+      - textual
+    unsupported:
+      - web
 
   Types:
     description: Utility data structures used by Toga APIs.
+    display: hide
+
+  Validators:
+    description: Mechanisms for validating that input meets a given set of criteria.
     display: hide

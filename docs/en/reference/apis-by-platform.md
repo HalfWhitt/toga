@@ -12,6 +12,7 @@
 	"Layout widgets",
 	"Resources",
 	"Hardware",
+	"Other",
 ] %}
 ## {{ category }} { .widgets_by_platform }
 

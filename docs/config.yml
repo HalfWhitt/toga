@@ -132,79 +132,57 @@ plugins:
             heading_level: 3  # Heading level of 3 to nest under References heading
   exclude:
     glob:
-      - reference/api/general-widgets/snippets/*
+      - reference/api/widgets/snippets/*
   redirects:
     redirect_maps:
       # Neither of these was ever linked to, but they are in the sitemap for 0.5.3.
-      reference/api/widgets/table-accessors/: reference/api/general-widgets/table.md
-      reference/api/widgets/table-values/: reference/api/general-widgets/table.md
-
-      reference/plugins/image_formats.md: reference/plugins/image-format-plugins.md
+      reference/api/widgets/table-accessors.md: reference/api/widgets/table.md
+      reference/api/widgets/table-values.md: reference/api/widgets/table.md
 
       ### API
 
       # Application components
-      reference/api/app.md: reference/api/application-components/app.md
-      reference/api/window.md: reference/api/application-components/window.md
-      reference/api/mainwindow.md: reference/api/application-components/mainwindow.md
-      reference/api/documentwindow.md: reference/api/application-components/documentwindow.md
-      reference/api/resources/command.md: reference/api/application-components/command.md
-      reference/api/resources/dialogs.md: reference/api/application-components/dialogs.md
-      reference/api/resources/statusicons.md: reference/api/application-components/status-icons.md
+      reference/api/app.md: reference/api/application/app.md
+      reference/api/window.md: reference/api/application/window.md
+      reference/api/mainwindow.md: reference/api/application/mainwindow.md
+      reference/api/documentwindow.md: reference/api/application/documentwindow.md
+      reference/api/resources/command.md: reference/api/application/command.md
+      reference/api/resources/dialogs.md: reference/api/application/dialogs.md
+      reference/api/resources/app_paths.md: reference/api/application/paths.md
+      reference/api/resources/statusicons.md: reference/api/application/status-icons.md
 
-      # General widgets
-      reference/api/widgets/activityindicator.md: reference/api/general-widgets/activityindicator.md
-      reference/api/widgets/button.md: reference/api/general-widgets/button.md
-      reference/api/widgets/canvas.md: reference/api/general-widgets/canvas.md
-      reference/api/widgets/dateinput.md: reference/api/general-widgets/dateinput.md
-      reference/api/widgets/detailedlist.md: reference/api/general-widgets/detailedlist.md
-      reference/api/widgets/divider.md: reference/api/general-widgets/divider.md
-      reference/api/widgets/imageview.md: reference/api/general-widgets/imageview.md
-      reference/api/widgets/label.md: reference/api/general-widgets/label.md
-      reference/api/widgets/mapview.md: reference/api/general-widgets/mapview.md
-      reference/api/widgets/multilinetextinput.md: reference/api/general-widgets/multilinetextinput.md
-      reference/api/widgets/numberinput.md: reference/api/general-widgets/numberinput.md
-      reference/api/widgets/passwordinput.md: reference/api/general-widgets/passwordinput.md
-      reference/api/widgets/progressbar.md: reference/api/general-widgets/progressbar.md
-      reference/api/widgets/selection.md: reference/api/general-widgets/selection.md
-      reference/api/widgets/slider.md: reference/api/general-widgets/slider.md
-      reference/api/widgets/switch.md: reference/api/general-widgets/switch.md
-      reference/api/widgets/table.md: reference/api/general-widgets/table.md
-      reference/api/widgets/textinput.md: reference/api/general-widgets/textinput.md
-      reference/api/widgets/timeinput.md: reference/api/general-widgets/timeinput.md
-      reference/api/widgets/tree.md: reference/api/general-widgets/tree.md
-      reference/api/widgets/webview.md: reference/api/general-widgets/webview.md
-      reference/api/widgets/widget.md: reference/api/general-widgets/widget.md
+      # General widgets: all unchanged
+      reference/api/resources/validators.md: reference/api/widgets/textinput/validators.md
 
-      # Layout widgets
-      reference/api/containers/box.md: reference/api/layout-widgets/box.md
-      reference/api/containers/optioncontainer.md: reference/api/layout-widgets/optioncontainer.md
-      reference/api/containers/scrollcontainer.md: reference/api/layout-widgets/scrollcontainer.md
-      reference/api/containers/splitcontainer.md: reference/api/layout-widgets/splitcontainer.md
+      # Container widgets
+      reference/api/containers/box.md: reference/api/widgets/containers/box.md
+      reference/api/containers/optioncontainer.md: reference/api/widgets/containers/optioncontainer.md
+      reference/api/containers/scrollcontainer.md: reference/api/widgets/containers/scrollcontainer.md
+      reference/api/containers/splitcontainer.md: reference/api/widgets/containers/splitcontainer.md
+
+      # Style
+      reference/style/pack.md: reference/api/style/pack.md
 
       # Resources
+      # resources/document.md unchanged
       reference/api/resources/fonts.md: reference/api/resources/font.md
       reference/api/resources/icons.md: reference/api/resources/icon.md
-      reference/api/resources/images.md: reference/api/resources/image.md
-      # resources/document.md unchanged
+      reference/api/resources/images.md: reference/api/resources/image/index.md
+      reference/plugins/image_formats.md: reference/api/resources/image/image-format-plugins.md
 
       # Data sources
-      reference/api/resources/sources/source.md: reference/api/data-sources/source.md
-      reference/api/resources/sources/list_source.md: reference/api/data-sources/listsource.md
-      reference/api/resources/sources/tree_source.md: reference/api/data-sources/treesource.md
-      reference/api/resources/sources/value_source.md: reference/api/data-sources/valuesource.md
+      reference/api/resources/sources/source.md: reference/api/sources/source.md
+      reference/api/resources/sources/list_source.md: reference/api/sources/listsource.md
+      reference/api/resources/sources/tree_source.md: reference/api/sources/treesource.md
+      reference/api/resources/sources/value_source.md: reference/api/sources/valuesource.md
+
+      # Constants and types
+      # constants_types/color.md is a new addition since last release
+      reference/api/constants.md: reference/api/constants_types/constants.md
+      reference/api/types.md: reference/api/constants_types/types.md
 
       # Hardware
       # hardware/camera.md unchanged
       reference/api/keys.md: reference/api/hardware/keys.md
       # hardware/location.md unchanged
       reference/api/hardware/screens.md: reference/api/hardware/screen.md
-
-      # Other
-      reference/api/resources/app_paths.md: reference/api/other/paths.md
-      reference/api/constants.md: reference/api/other/constants.md
-      reference/api/types.md: reference/api/other/types.md
-      reference/api/resources/validators.md: reference/api/other/validators.md
-
-      # By platform
-      reference/widgets_by_platform.md: reference/apis-by-platform.md

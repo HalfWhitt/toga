@@ -2,12 +2,13 @@
 
 {% for category in [
 	"Application components",
-	"General widgets",
-	"Layout widgets",
+	"Widgets",
+	"Container widgets",
+	"Style",
 	"Resources",
 	"Data sources",
+	"Constants and types",
 	"Hardware",
-	"Other"
 ] %}
 ## {{ category }} { .api-reference }
 

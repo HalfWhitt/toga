@@ -1,4 +1,4 @@
-{{ component_header("Validators") }}
+
 
 ## Usage
 

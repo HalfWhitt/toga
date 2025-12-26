@@ -31,10 +31,13 @@ APIS_BY_NAME = {}
 APIS_BY_CATEGORY = defaultdict(list)
 
 for category_name, category_contents in api_data.items():
-    category_path = Path(slugify(category_name))
+    category_path = Path(category_contents.pop("path", slugify(category_name)))
     for component_name, component in category_contents.items():
         file_name = component.get("file_name", slugify(component_name, sep=""))
         path = category_path / f"{file_name}.md"
+        if not (Path("docs/en/reference/api") / path).is_file():
+            # It's a directory
+            path = category_path / f"{file_name}/index.md"
 
         unsupported = component.get("unsupported", [])
         beta = component.get("beta", [])
@@ -65,9 +68,8 @@ def component_support(name, width, alt_file):
     component = APIS_BY_NAME[name]
 
     if component["display"] == "table":
-        return (
-            "Availability ([Key][api-status-key])\n{: .availability-title }\n\n"
-            + tabulate([component["platforms"]], headers="keys", tablefmt="github")
+        return "Availability\n{: .availability-title }\n\n" + tabulate(
+            [component["platforms"]], headers="keys", tablefmt="github"
         )
     elif component["display"] == "tabs":
         return component_tab_view(name, component, width, alt_file)

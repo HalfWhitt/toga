@@ -1,4 +1,6 @@
 Application components:
+  path: application
+
   App:
     description: The top-level representation of an application.
     display: table
@@ -42,6 +44,14 @@ Application components:
       - textual
       - qt
 
+  Paths:
+    description: A mechanism for obtaining platform-appropriate filesystem locations for an application.
+    display: table
+    beta:
+      - textual
+    unsupported:
+      - web
+
   Status icons:
     description: Icons that appear in the system tray for representing app status
       while the app isn't visible.
@@ -53,7 +63,7 @@ Application components:
       - textual
       - qt
 
-General widgets:
+Widgets:
   ActivityIndicator:
     description: A small animated indicator showing activity on a task of indeterminate length, usually rendered as a "spinner" animation.
     beta:
@@ -212,7 +222,9 @@ General widgets:
       - textual
     display: table
 
-Layout widgets:
+Container widgets:
+  path: widgets/containers
+
   Box:
     description: A generic container for other widgets. Used to construct layouts.
     beta:
@@ -243,6 +255,11 @@ Layout widgets:
       - web
       - textual
       - qt
+
+Style:
+  Pack:
+    description: Toga's style and layout engine.
+    display: hide
 
 Resources:
   Document:
@@ -277,6 +294,8 @@ Resources:
       - textual
 
 Data sources:
+  path: sources
+
   Source:
     description: A base class for data source implementations.
     display: hide
@@ -291,6 +310,21 @@ Data sources:
 
   ValueSource:
     description: A data source describing a single value.
+    display: hide
+
+Constants and types:
+  path: constants_types
+
+  Color:
+    description: A representation of a color.
+    display: hide
+
+  Constants:
+    description: Symbolic constants used by various APIs.
+    display: hide
+
+  Types:
+    description: Utility data structures used by Toga APIs.
     display: hide
 
 Hardware:
@@ -323,28 +357,3 @@ Hardware:
     beta:
       - web
       - textual
-
-Other:
-  Color:
-    description: A representation of a color.
-    display: hide
-
-  Constants:
-    description: Symbolic constants used by various APIs.
-    display: hide
-
-  Paths:
-    description: A mechanism for obtaining platform-appropriate filesystem locations for an application.
-    display: table
-    beta:
-      - textual
-    unsupported:
-      - web
-
-  Types:
-    description: Utility data structures used by Toga APIs.
-    display: hide
-
-  Validators:
-    description: Mechanisms for validating that input meets a given set of criteria.
-    display: hide

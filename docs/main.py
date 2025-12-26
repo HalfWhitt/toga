@@ -9,8 +9,7 @@ from tabulate import tabulate
 
 
 def slugify(string, sep="-"):
-    string = "".join(f"{sep}{char}" if char.isupper() else char for char in string)
-    return string.lstrip(sep).lower().replace(" ", sep)
+    return string.lower().replace(" ", sep)
 
 
 PLATFORMS_MAPPING = {
@@ -79,7 +78,7 @@ def component_support(name, width, alt_file):
 
 def component_tab_view(name, component, width, alt_file):
     """Render component's support by platform as a tabbed view."""
-    slug = alt_file if alt_file else slugify(name)
+    slug = alt_file if alt_file else slugify(name, sep="")
     tabs = []
     for (platform, status), backend in zip(
         # Zip in the keys of PLATFORM_MAPPING to have the backend name.

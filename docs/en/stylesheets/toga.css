@@ -31,8 +31,8 @@ h2.api-reference + .md-typeset__scrollwrap table thead th {
     min-width: 3rem;
 }
 
-h2.api-reference + .md-typeset__scrollwrap table thead th,
-h2.api-reference + .md-typeset__scrollwrap table tbody td:first-of-type {
+h2.api-reference + .md-typeset__scrollwrap .md-typeset__table table thead th,
+h2.api-reference + .md-typeset__scrollwrap .md-typeset__table table tbody td:first-of-type {
     font-size: 0.7rem;
 }
 

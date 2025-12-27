@@ -1,5 +1,11 @@
 # API Reference
 
+## Key  {: .availability-title id="api-status-key" }
+
+| {{ partly_supported }} | Partly supported: functionality or testing is incomplete |
+|------------------------|----------------------------------------------------------|
+| {{ fully_supported }}  | **Fully supported**                                      |
+
 {% for category in [
 	"Application components",
 	"Widgets",

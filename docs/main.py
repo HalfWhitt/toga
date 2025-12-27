@@ -67,8 +67,9 @@ def component_support(name, width, alt_file):
     component = APIS_BY_NAME[name]
 
     if component["display"] == "table":
-        return "Availability\n{: .availability-title }\n\n" + tabulate(
-            [component["platforms"]], headers="keys", tablefmt="github"
+        return (
+            "Availability ([Key][api-status-key])\n{: .availability-title }\n\n"
+            + tabulate([component["platforms"]], headers="keys", tablefmt="github")
         )
     elif component["display"] == "tabs":
         return component_tab_view(name, component, width, alt_file)

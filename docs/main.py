@@ -53,7 +53,6 @@ for category_name, category_contents in api_data.items():
             "link": f"[{component_name}]({path})",
             "link_from_platforms": f"[{component_name}]({Path('api') / path})",
             "description": component["description"],
-            "path_from_platforms": Path("api") / path,
             "platforms": platform_support,
             "display": component.get("display", "tabs"),
         }
@@ -125,7 +124,9 @@ def define_env(env):
             }
             for component in APIS_BY_CATEGORY[category]
         ]
-        return tabulate(rows, headers="keys", tablefmt="github")
+        result = tabulate(rows, headers="keys", tablefmt="github")
+        print(result)
+        return result
 
     @env.macro
     def component_header(name, width=None, alt_file=None):

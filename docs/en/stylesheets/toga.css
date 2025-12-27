@@ -21,73 +21,35 @@
     padding: 0.2rem 0.6rem;
 }
 
-.availability-title + .md-typeset__scrollwrap table,
-h2.api-reference + .md-typeset__scrollwrap table {
-    width: unset;
-}
-
-.availability-title + .md-typeset__scrollwrap table thead th,
-h2.api-reference + .md-typeset__scrollwrap table thead th {
+.availability-title + .md-typeset__scrollwrap table th,
+h2.api-reference + .md-typeset__scrollwrap table th {
     min-width: 3rem;
 }
 
-h2.api-reference + .md-typeset__scrollwrap .md-typeset__table table thead th,
-h2.api-reference + .md-typeset__scrollwrap .md-typeset__table table tbody td:first-of-type {
+h2.api-reference + .md-typeset__scrollwrap th,
+h2.api-reference + .md-typeset__scrollwrap td:first-of-type {
     font-size: 0.7rem;
 }
 
-/*h2.api-reference + .md-typeset__scrollwrap table thead tr th:first-of-type {
-    min-width: 11rem;
-}*/
-
-h2.api-reference + .md-typeset__scrollwrap table th,
-h2.api-reference + .md-typeset__scrollwrap table td:first-of-type {
+h2.api-reference + .md-typeset__scrollwrap th,
+h2.api-reference + .md-typeset__scrollwrap td:first-of-type {
     padding: 0.4em 0.63em;
 }
 
-h2.api-reference + .md-typeset__scrollwrap table td:not([align]):first-of-type {
+h2.api-reference + .md-typeset__scrollwrap td:first-of-type {
     text-align: left !important;
     font-weight: bolder;
 }
 
-.availability-title + .md-typeset__scrollwrap table thead th:not([align]),
-.availability-title + .md-typeset__scrollwrap table tbody td:not([align]),
-h2.api-reference + .md-typeset__scrollwrap table thead th:not([align]),
-h2.api-reference + .md-typeset__scrollwrap table tbody td:not([align]) {
+.availability-title + .md-typeset__scrollwrap th,
+.availability-title + .md-typeset__scrollwrap td,
+h2.api-reference + .md-typeset__scrollwrap th,
+h2.api-reference + .md-typeset__scrollwrap td {
     text-align: center !important;
     border: .05rem solid var(--md-typeset-table-color);
 }
 
-.api-reference + .md-typeset__scrollwrap table td {
+.api-reference + .md-typeset__scrollwrap td {
     vertical-align: middle;
     padding: 0.4rem 0.5rem;
 }
-
-/*.api-reference_key + .md-typeset__scrollwrap .md-typeset__table table thead tr th:first-of-type {
-    min-width: 2rem;
-}*/
-
-.api-reference_key + .md-typeset__scrollwrap .md-typeset__table table thead th + th,
-.api-reference_key + .md-typeset__scrollwrap .md-typeset__table table tbody td + td {
-    padding-left: 0.2rem;
-}
-
-/* API Reference tables */
-/*h2.api-reference + .md-typeset__scrollwrap .md-typeset__table table {
-    font-size: 0.73rem;
-}
-
-h2.api-reference + .md-typeset__scrollwrap .md-typeset__table th {
-    text-align: center;
-    padding: 0 0.25em;
-    background-color: light-dark(#e8e8e8, #313643);
-}
-
-h2.api-reference + .md-typeset__scrollwrap .md-typeset__table td {
-    padding: 0.2em 0.4em;
-    vertical-align: middle;
-}
-
-h2.api-reference + .md-typeset__scrollwrap .md-typeset__table td:first-of-type {
-    border-right: .05rem solid var(--md-typeset-table-color);
-}*/

@@ -1,11 +1,6 @@
 copyright: © Russell Keith-Magee
 
-not_in_nav: |
-  /index.md
-  reference/api/widgets/table-values.md
-  reference/api/widgets/table-accessors.md
-  reference/platforms/linux/gtk-prerequisites.md
-  reference/platforms/linux/qt-prerequisites.md
+not_in_nav: index.md
 
 validation:
   omitted_files: warn
@@ -131,15 +126,24 @@ plugins:
             show_attribute_values: false  # Suppresses the values of attributes in the signature
             heading_level: 3  # Heading level of 3 to nest under References heading
   exclude:
+    # Files that shouldn't be in the sitemap
     glob:
-      - reference/api/widgets/snippets/*
+      - snippets/*
   redirects:
     redirect_maps:
-      # Neither of these was ever linked to, but they are in the sitemap for 0.5.3.
+      # These were never linked to, but they are in the sitemap for 0.5.3.
       reference/api/widgets/table-accessors.md: reference/api/widgets/table.md
       reference/api/widgets/table-values.md: reference/api/widgets/table.md
+      reference/platforms/linux/gtk-prerequisites.md: reference/platforms/linux/index.md
+      reference/platforms/linux/qt-prerequisites.md: reference/platforms/linux/index.md
+      SUMMARY.md: index.md
+
+      # Contribution guide
+      how-to/contribute/code.md: how-to/contribute/index.md
+      how-to/contribute/docs.md: how-to/contribute/index.md
 
       ### API
+      reference/widgets_by_platform.md: reference/index.md
 
       # Application components
       reference/api/app.md: reference/api/application/app.md

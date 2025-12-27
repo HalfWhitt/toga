@@ -115,26 +115,15 @@ def component_tab_view(name, component, width, alt_file):
 
 def define_env(env):
     @env.macro
-    def api_table(category, platforms=False):
+    def api_table(category):
         """Render table of a category of APIs for the two reference pages."""
-        components = APIS_BY_CATEGORY[category]
-        if platforms:
-            rows = [
-                {
-                    "Component": component["link_from_platforms"],
-                    **component["platforms"],
-                }
-                for component in components
-                if not component["display"] == "hide"
-            ]
-        else:
-            rows = [
-                {
-                    "Component": component["link"],
-                    "Description": component["description"],
-                }
-                for component in components
-            ]
+        rows = [
+            {
+                "Component": f"{component['link']}<br>{component['description']}",
+                **component["platforms"],
+            }
+            for component in APIS_BY_CATEGORY[category]
+        ]
         return tabulate(rows, headers="keys", tablefmt="github")
 
     @env.macro

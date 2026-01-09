@@ -31,6 +31,10 @@ class Context:
         self.path = Path()
         self.states = []  # Only tracks stroke/fill
 
+        # Backwards compatibility for Toga <= 0.5.3
+        self.in_fill = False
+        self.in_stroke = False
+
         self.fill_paint = Paint()
         self.fill_paint.setAntiAlias(True)
         self.fill_paint.setStyle(Paint.Style.FILL)
@@ -174,18 +178,12 @@ class Context:
 
         for line_num, line in enumerate(text.splitlines()):
             # FILL_AND_STROKE doesn't allow separate colors, so we have to draw twice.
-            draw_args = [line, x, top + (scaled_line_height * line_num), paint]
+            draw_args = (line, x, top + (scaled_line_height * line_num))
 
-            self.android_canvas.drawText(*draw_args)
-            # if (color := kwargs.get("fill_color")) is not None:
-            #     paint.setStyle(Paint.Style.FILL)
-            #     paint.setColor(jint(native_color(color)))
-            #     canvas.drawText(*draw_args)
-            # if (color := kwargs.get("stroke_color")) is not None:
-            #     paint.setStyle(Paint.Style.STROKE)
-            #     paint.setStrokeWidth(kwargs["line_width"])
-            #     paint.setColor(jint(native_color(color)))
-            #     canvas.drawText(*draw_args)
+            if self.in_fill:
+                self.android_canvas.drawText(*draw_args, self.fill_paint)
+            if self.in_stroke:
+                self.android_canvas.drawText(*draw_args, self.stroke_paint)
 
 
 class DrawHandler(dynamic_proxy(IDrawHandler)):

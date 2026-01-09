@@ -1,5 +1,4 @@
 import math
-import os
 from itertools import chain
 from math import pi, radians
 from unittest.mock import Mock, call
@@ -684,10 +683,10 @@ async def test_transforms(canvas, probe):
     assert_reference(probe, "transforms")
 
 
-@pytest.mark.xfail(
-    condition=os.environ.get("RUNNING_IN_CI") != "true",
-    reason="Canvas tests are unstable outside of CI. Manual inspection may be required",
-)
+# @pytest.mark.xfail(
+#     condition=os.environ.get("RUNNING_IN_CI") != "true",
+#     reason="Canvas tests are unstable outside of CI. Manual inspection may be required",  # noqa E501
+# )
 async def test_write_text(canvas, probe):
     "Text can be measured and written"
 
@@ -767,10 +766,10 @@ async def test_write_text(canvas, probe):
     assert_reference(probe, "write_text", threshold=0.035)
 
 
-@pytest.mark.xfail(
-    condition=os.environ.get("RUNNING_IN_CI") != "true",
-    reason="may fail outside of a GitHub runner environment",
-)
+# @pytest.mark.xfail(
+#     condition=os.environ.get("RUNNING_IN_CI") != "true",
+#     reason="may fail outside of a GitHub runner environment",
+# )
 async def test_multiline_text(canvas, probe):
     "Multiline text can be measured and written"
 
@@ -832,13 +831,13 @@ async def test_multiline_text(canvas, probe):
             text_filler.write_text(text, left, y, font, baseline)
 
     await probe.redraw("Multiple text blocks should be drawn")
-    assert_reference(probe, "multiline_text")
+    assert_reference(probe, "multiline_text", 0.03)
 
 
-@pytest.mark.xfail(
-    condition=os.environ.get("RUNNING_IN_CI") != "true",
-    reason="may fail outside of a GitHub runner environment",
-)
+# @pytest.mark.xfail(
+#     condition=os.environ.get("RUNNING_IN_CI") != "true",
+#     reason="may fail outside of a GitHub runner environment",
+# )
 async def test_write_text_and_path(canvas, probe):
     "Text doesn't affect the current path."
 

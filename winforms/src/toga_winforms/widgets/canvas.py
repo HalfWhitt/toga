@@ -1,3 +1,4 @@
+from copy import deepcopy
 from math import degrees
 
 import System.Windows.Forms as WinForms
@@ -54,7 +55,7 @@ class State:
             pen=Pen(BLACK, canvas.scale_in(2.0, rounding=None)),
         )
 
-    def copy(self):
+    def __deepcopy__(self, memo):
         return type(self)(
             matrix=self.matrix.Clone(),
             brush=self.brush.Clone(),
@@ -180,7 +181,7 @@ class Canvas(Box):
 
     def save(self):
         self.states.append(self.state)
-        self.state = self.state.copy()
+        self.state = deepcopy(self.state)
 
     def restore(self):
         self.state = self.states.pop()

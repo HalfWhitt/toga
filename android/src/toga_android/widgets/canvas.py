@@ -190,14 +190,25 @@ class Context:
             # Default to Baseline.ALPHABETIC
             top = y
 
+        # Avoid mutating state
+        if self.in_fill:
+            fill = Paint(self.state.fill)
+            fill.setTypeface(font.typeface())
+            fill.setTextSize(self.impl.scale_out(font.size()))
+
+        if self.in_stroke:
+            stroke = Paint(self.state.stroke)
+            stroke.setTypeface(font.typeface())
+            stroke.setTextSize(self.impl.scale_out(font.size()))
+
         for line_num, line in enumerate(text.splitlines()):
             # FILL_AND_STROKE doesn't allow separate colors, so we have to draw twice.
             draw_args = (line, x, top + (scaled_line_height * line_num))
 
             if self.in_fill:
-                self.android_canvas.drawText(*draw_args, self.state.fill)
+                self.android_canvas.drawText(*draw_args, fill)
             if self.in_stroke:
-                self.android_canvas.drawText(*draw_args, self.state.stroke)
+                self.android_canvas.drawText(*draw_args, stroke)
 
 
 class DrawHandler(dynamic_proxy(IDrawHandler)):

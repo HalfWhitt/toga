@@ -42,7 +42,7 @@ class State:
     we used it. And it would still need to be kept in a list.
     """
 
-    def __init__(self, matrix, brush, pen, impl):
+    def __init__(self, matrix, brush, pen):
         self.matrix = matrix
         self.brush = brush
         self.pen = pen

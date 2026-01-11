@@ -72,6 +72,10 @@ class Context:
         self.impl = impl
         self.states = [State.for_impl(self.impl)]
 
+        # Backwards compatibility for Toga <= 0.5.3
+        self.in_fill = False
+        self.in_stroke = False
+
     # Windows path management
     @property
     def current_path(self):
@@ -244,6 +248,46 @@ class Context:
         self.state.matrix.Reset()
         self.scale(self.impl.dpi_scale, self.impl.dpi_scale)
 
+    # Text
+
+    def write_text(self, text, x, y, font, baseline, line_height):
+        # Writing text should not affect current path, so save current paths
+        current_paths = self.paths
+        # new path for text
+        self.context.clear_paths()
+        self._text_path(text, x, y, font, baseline, line_height)
+        if self.in_fill:
+            self.fill()
+        if self.in_stroke:
+            self.stroke()
+        # restore previous current paths - this is a bit hacky
+        self.context.paths = current_paths
+
+    def _text_path(self, text, x, y, font, baseline, line_height):
+        lines = text.splitlines()
+        scaled_line_height = self.impl._line_height(font, line_height)
+        total_height = scaled_line_height * len(lines)
+
+        if baseline == Baseline.TOP:
+            top = y
+        elif baseline == Baseline.MIDDLE:
+            top = y - (total_height / 2)
+        elif baseline == Baseline.BOTTOM:
+            top = y - total_height
+        else:
+            # Default to Baseline.ALPHABETIC
+            top = y - font.metric("CellAscent")
+
+        for line_num, line in enumerate(lines):
+            self.current_path.AddString(
+                line,
+                font.native.FontFamily,
+                font.native.Style.value__,
+                font.metric("EmHeight"),
+                PointF(x, top + (scaled_line_height * line_num)),
+                self.impl.string_format,
+            )
+
 
 class Canvas(Box):
     def create(self):
@@ -316,40 +360,6 @@ class Canvas(Box):
         else:
             # Get size in CSS pixels
             return (font.native.SizeInPoints * 96 / 72) * line_height
-
-    def write_text(self, text, x, y, font, baseline, line_height):
-        # Writing text should not affect current path, so save current paths
-        current_paths = self.context.paths
-        # new path for text
-        self.context.clear_paths()
-        self._text_path(text, x, y, font, baseline, line_height)
-        # restore previous current paths - this is a bit hacky
-        self.context.paths = current_paths
-
-    def _text_path(self, text, x, y, font, baseline, line_height):
-        lines = text.splitlines()
-        scaled_line_height = self._line_height(font, line_height)
-        total_height = scaled_line_height * len(lines)
-
-        if baseline == Baseline.TOP:
-            top = y
-        elif baseline == Baseline.MIDDLE:
-            top = y - (total_height / 2)
-        elif baseline == Baseline.BOTTOM:
-            top = y - total_height
-        else:
-            # Default to Baseline.ALPHABETIC
-            top = y - font.metric("CellAscent")
-
-        for line_num, line in enumerate(lines):
-            self.context.current_path.AddString(
-                line,
-                font.native.FontFamily,
-                font.native.Style.value__,
-                font.metric("EmHeight"),
-                PointF(x, top + (scaled_line_height * line_num)),
-                self.string_format,
-            )
 
     def measure_text(self, text, font, line_height):
         graphics = self.native.CreateGraphics()

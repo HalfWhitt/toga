@@ -254,14 +254,14 @@ class Context:
         # Writing text should not affect current path, so save current paths
         current_paths = self.paths
         # new path for text
-        self.context.clear_paths()
+        self.begin_path()
         self._text_path(text, x, y, font, baseline, line_height)
         if self.in_fill:
-            self.fill()
+            self.fill(FillRule.NONZERO)
         if self.in_stroke:
             self.stroke()
         # restore previous current paths - this is a bit hacky
-        self.context.paths = current_paths
+        self.paths = current_paths
 
     def _text_path(self, text, x, y, font, baseline, line_height):
         lines = text.splitlines()

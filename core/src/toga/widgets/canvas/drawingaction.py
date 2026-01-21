@@ -1,13 +1,13 @@
-from __future__ import annotations
-
 from abc import ABC, abstractmethod
 from dataclasses import InitVar, dataclass, fields, is_dataclass
 from enum import Enum
+from functools import partial
 from math import pi
-from typing import TYPE_CHECKING, Any
+from types import UnionType
+from typing import Any, get_args
 from warnings import filterwarnings, warn
 
-from toga.colors import Color
+from toga.colors import Color, ColorT
 from toga.constants import Baseline, FillRule
 from toga.fonts import (
     SYSTEM,
@@ -15,9 +15,6 @@ from toga.fonts import (
     Font,
 )
 from toga.images import Image
-
-if TYPE_CHECKING:
-    from toga.colors import ColorT
 
 # Make sure deprecation warnings are shown by default
 filterwarnings("default", category=DeprecationWarning)
@@ -49,6 +46,26 @@ def _determine_counterclockwise(anticlockwise, counterclockwise):
 ######################################################################
 # End backwards compatibility
 ######################################################################
+
+
+def _validate_optional(name, typ, optional, value):
+    if optional and value is None:
+        return None
+    print(typ)
+    if typ != list[float] and isinstance(value, typ):
+        return value
+
+    try:
+        if typ is Color:
+            return Color.parse(value)
+        if typ == list[float]:
+            return [float(n) for n in value]
+        return typ(value)
+
+    except (ValueError, TypeError) as exc:
+        raise ValueError(
+            f"Invalid value for {name}: {value}. Should be: {typ}"
+        ) from exc
 
 
 class DrawingAction(ABC):
@@ -86,6 +103,38 @@ class DrawingAction(ABC):
     # above with any given list item on multiple lines; an undesired space is added if
     # the link content is split on two lines.
 
+    __slots__ = []
+
+    def __setattr__(self, name, value):
+        if is_dataclass(self):
+            if not hasattr(self, "_validators"):
+                validators = {}
+
+                for field in fields(self):
+                    typ = field.type
+                    optional = False
+
+                    if type(typ) is UnionType:  # Doesn't support isinstance
+                        typ = get_args(typ)[0]
+                        optional = True
+
+                    validators[field.name] = partial(
+                        _validate_optional,
+                        field.name,
+                        typ,
+                        optional,
+                    )
+                type(self)._validators = validators
+
+            try:
+                validate = self._validators[name]
+            except KeyError:
+                pass  # Not a field
+            else:
+                value = validate(value)
+
+        super().__setattr__(name, value)
+
     def __repr__(self) -> str:
         if is_dataclass(self):
             str_fields = []
@@ -110,37 +159,21 @@ class DrawingAction(ABC):
     def _draw(self, context: Any) -> None: ...
 
 
-class color_property:
-    def __get__(self, action, action_class=None):
-        if action is None:
-            return self
-
-        return action._color
-
-    def __set__(self, action, value):
-        if value is self or value is None:
-            # value is self when no argument is supplied in the dataclass constructor;
-            # this is how we define a default value for the hidden attribute.
-            value = None
-        else:
-            value = Color.parse(value)
-
-        action._color = value
-
-
+@dataclass(repr=False, slots=True)
 class BeginPath(DrawingAction):
     def _draw(self, context: Any) -> None:
         context.begin_path()
 
 
+@dataclass(repr=False, slots=True)
 class ClosePath(DrawingAction):
     def _draw(self, context: Any) -> None:
         context.close_path()
 
 
-@dataclass(repr=False)
+@dataclass(repr=False, slots=True)
 class Fill(DrawingAction):
-    color: ColorT | None = color_property()
+    color: ColorT | None = None
     fill_rule: FillRule = FillRule.NONZERO
 
     def _draw(self, context: Any) -> None:
@@ -151,9 +184,9 @@ class Fill(DrawingAction):
         context.restore()
 
 
-@dataclass(repr=False)
+@dataclass(repr=False, slots=True)
 class Stroke(DrawingAction):
-    color: ColorT | None = color_property()
+    color: ColorT | None = None
     line_width: float | None = None
     line_dash: list[float] | None = None
 
@@ -169,7 +202,7 @@ class Stroke(DrawingAction):
         context.restore()
 
 
-@dataclass(repr=False)
+@dataclass(repr=False, slots=True)
 class MoveTo(DrawingAction):
     x: float
     y: float
@@ -178,7 +211,7 @@ class MoveTo(DrawingAction):
         context.move_to(self.x, self.y)
 
 
-@dataclass(repr=False)
+@dataclass(repr=False, slots=True)
 class LineTo(DrawingAction):
     x: float
     y: float
@@ -187,7 +220,7 @@ class LineTo(DrawingAction):
         context.line_to(self.x, self.y)
 
 
-@dataclass(repr=False)
+@dataclass(repr=False, slots=True)
 class BezierCurveTo(DrawingAction):
     cp1x: float
     cp1y: float
@@ -202,7 +235,7 @@ class BezierCurveTo(DrawingAction):
         )
 
 
-@dataclass(repr=False)
+@dataclass(repr=False, slots=True)
 class QuadraticCurveTo(DrawingAction):
     cpx: float
     cpy: float
@@ -213,7 +246,7 @@ class QuadraticCurveTo(DrawingAction):
         context.quadratic_curve_to(self.cpx, self.cpy, self.x, self.y)
 
 
-@dataclass(repr=False)
+@dataclass(repr=False, slots=True)
 class Arc(DrawingAction):
     x: float
     y: float
@@ -247,7 +280,7 @@ class Arc(DrawingAction):
         )
 
 
-@dataclass(repr=False)
+@dataclass(repr=False, slots=True)
 class Ellipse(DrawingAction):
     x: float
     y: float
@@ -286,7 +319,7 @@ class Ellipse(DrawingAction):
         )
 
 
-@dataclass(repr=False)
+@dataclass(repr=False, slots=True)
 class Rect(DrawingAction):
     x: float
     y: float
@@ -297,7 +330,7 @@ class Rect(DrawingAction):
         context.rect(self.x, self.y, self.width, self.height)
 
 
-@dataclass(repr=False)
+@dataclass(repr=False, slots=True)
 class WriteText(DrawingAction):
     text: str
     x: float = 0.0
@@ -321,7 +354,7 @@ class WriteText(DrawingAction):
         )
 
 
-@dataclass(repr=False)
+@dataclass(repr=False, slots=True)
 class DrawImage(DrawingAction):
     image: Image
     x: float = 0.0
@@ -339,7 +372,7 @@ class DrawImage(DrawingAction):
         )
 
 
-@dataclass(repr=False)
+@dataclass(repr=False, slots=True)
 class Rotate(DrawingAction):
     radians: float
 
@@ -347,7 +380,7 @@ class Rotate(DrawingAction):
         context.rotate(self.radians)
 
 
-@dataclass(repr=False)
+@dataclass(repr=False, slots=True)
 class Scale(DrawingAction):
     sx: float
     sy: float
@@ -356,7 +389,7 @@ class Scale(DrawingAction):
         context.scale(self.sx, self.sy)
 
 
-@dataclass(repr=False)
+@dataclass(repr=False, slots=True)
 class Translate(DrawingAction):
     tx: float
     ty: float
@@ -365,6 +398,7 @@ class Translate(DrawingAction):
         context.translate(self.tx, self.ty)
 
 
+@dataclass(repr=False, slots=True)
 class ResetTransform(DrawingAction):
     def _draw(self, context: Any) -> None:
         context.reset_transform()

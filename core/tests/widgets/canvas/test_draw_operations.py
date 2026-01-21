@@ -155,14 +155,14 @@ def test_fill(widget, kwargs, args_repr, draw_objs, attrs):
         # Line dash
         (
             {"line_dash": [2, 7]},
-            "color=None, line_width=None, line_dash=[2, 7]",
+            "color=None, line_width=None, line_dash=[2.0, 7.0]",
             [("set line dash", [2, 7])],
             {"color": None, "line_width": None, "line_dash": [2, 7]},
         ),
         # All args
         (
             {"color": REBECCAPURPLE, "line_width": 4.5, "line_dash": [2, 7]},
-            f"color={REBECCA_PURPLE_COLOR!r}, line_width=4.500, line_dash=[2, 7]",
+            f"color={REBECCA_PURPLE_COLOR!r}, line_width=4.500, line_dash=[2.0, 7.0]",
             [
                 ("set stroke style", REBECCA_PURPLE_COLOR),
                 ("set line width", 4.5),
@@ -198,7 +198,7 @@ def test_move_to(widget):
     draw_op = widget.context.move_to(10, 20)
 
     assert_action_performed(widget, "redraw")
-    assert repr(draw_op) == "MoveTo(x=10, y=20)"
+    assert repr(draw_op) == "MoveTo(x=10.000, y=20.000)"
 
     # The first and last instructions push/pull the root context, and can be ignored.
     assert widget._impl.draw_instructions[1:-1] == [
@@ -215,7 +215,7 @@ def test_line_to(widget):
     draw_op = widget.context.line_to(10, 20)
 
     assert_action_performed(widget, "redraw")
-    assert repr(draw_op) == "LineTo(x=10, y=20)"
+    assert repr(draw_op) == "LineTo(x=10.000, y=20.000)"
 
     # The first and last instructions push/pull the root context, and can be ignored.
     assert widget._impl.draw_instructions[1:-1] == [
@@ -232,8 +232,9 @@ def test_bezier_curve_to(widget):
     draw_op = widget.context.bezier_curve_to(10, 20, 30, 40, 50, 60)
 
     assert_action_performed(widget, "redraw")
-    assert (
-        repr(draw_op) == "BezierCurveTo(cp1x=10, cp1y=20, cp2x=30, cp2y=40, x=50, y=60)"
+    assert repr(draw_op) == (
+        "BezierCurveTo(cp1x=10.000, cp1y=20.000, cp2x=30.000, cp2y=40.000, "
+        "x=50.000, y=60.000)"
     )
 
     # The first and last instructions push/pull the root context, and can be ignored.
@@ -258,7 +259,9 @@ def test_quadratic_curve_to(widget):
     draw_op = widget.context.quadratic_curve_to(10, 20, 30, 40)
 
     assert_action_performed(widget, "redraw")
-    assert repr(draw_op) == "QuadraticCurveTo(cpx=10, cpy=20, x=30, y=40)"
+    assert (
+        repr(draw_op) == "QuadraticCurveTo(cpx=10.000, cpy=20.000, x=30.000, y=40.000)"
+    )
 
     # The first and last instructions push/pull the root context, and can be ignored.
     assert widget._impl.draw_instructions[1:-1] == [
@@ -282,7 +285,7 @@ def test_quadratic_curve_to(widget):
         (
             {"x": 10, "y": 20, "radius": 30},
             (
-                "x=10, y=20, radius=30, startangle=0.000, "
+                "x=10.000, y=20.000, radius=30.000, startangle=0.000, "
                 "endangle=6.283, counterclockwise=False"
             ),
             {
@@ -298,7 +301,7 @@ def test_quadratic_curve_to(widget):
         (
             {"x": 10, "y": 20, "radius": 30, "startangle": 1.234},
             (
-                "x=10, y=20, radius=30, startangle=1.234, "
+                "x=10.000, y=20.000, radius=30.000, startangle=1.234, "
                 "endangle=6.283, counterclockwise=False"
             ),
             {
@@ -319,7 +322,7 @@ def test_quadratic_curve_to(widget):
                 "endangle": 2.345,
             },
             (
-                "x=10, y=20, radius=30, startangle=0.000, "
+                "x=10.000, y=20.000, radius=30.000, startangle=0.000, "
                 "endangle=2.345, counterclockwise=False"
             ),
             {
@@ -340,7 +343,7 @@ def test_quadratic_curve_to(widget):
                 "counterclockwise": False,
             },
             (
-                "x=10, y=20, radius=30, startangle=0.000, "
+                "x=10.000, y=20.000, radius=30.000, startangle=0.000, "
                 "endangle=6.283, counterclockwise=False"
             ),
             {
@@ -361,7 +364,7 @@ def test_quadratic_curve_to(widget):
                 "counterclockwise": True,
             },
             (
-                "x=10, y=20, radius=30, startangle=0.000, "
+                "x=10.000, y=20.000, radius=30.000, startangle=0.000, "
                 "endangle=6.283, counterclockwise=True"
             ),
             {
@@ -384,7 +387,7 @@ def test_quadratic_curve_to(widget):
                 "counterclockwise": True,
             },
             (
-                "x=10, y=20, radius=30, startangle=1.234, "
+                "x=10.000, y=20.000, radius=30.000, startangle=1.234, "
                 "endangle=2.345, counterclockwise=True"
             ),
             {
@@ -422,7 +425,7 @@ def test_arc(widget, kwargs, args_repr, draw_kwargs):
         (
             {"x": 10, "y": 20, "radiusx": 30, "radiusy": 40},
             (
-                "x=10, y=20, radiusx=30, radiusy=40, "
+                "x=10.000, y=20.000, radiusx=30.000, radiusy=40.000, "
                 "rotation=0.000, startangle=0.000, endangle=6.283, "
                 "counterclockwise=False"
             ),
@@ -441,7 +444,7 @@ def test_arc(widget, kwargs, args_repr, draw_kwargs):
         (
             {"x": 10, "y": 20, "radiusx": 30, "radiusy": 40, "rotation": 1.234},
             (
-                "x=10, y=20, radiusx=30, radiusy=40, "
+                "x=10.000, y=20.000, radiusx=30.000, radiusy=40.000, "
                 "rotation=1.234, startangle=0.000, endangle=6.283, "
                 "counterclockwise=False"
             ),
@@ -460,7 +463,7 @@ def test_arc(widget, kwargs, args_repr, draw_kwargs):
         (
             {"x": 10, "y": 20, "radiusx": 30, "radiusy": 40, "startangle": 2.345},
             (
-                "x=10, y=20, radiusx=30, radiusy=40, "
+                "x=10.000, y=20.000, radiusx=30.000, radiusy=40.000, "
                 "rotation=0.000, startangle=2.345, endangle=6.283, "
                 "counterclockwise=False"
             ),
@@ -479,7 +482,7 @@ def test_arc(widget, kwargs, args_repr, draw_kwargs):
         (
             {"x": 10, "y": 20, "radiusx": 30, "radiusy": 40, "endangle": 3.456},
             (
-                "x=10, y=20, radiusx=30, radiusy=40, "
+                "x=10.000, y=20.000, radiusx=30.000, radiusy=40.000, "
                 "rotation=0.000, startangle=0.000, endangle=3.456, "
                 "counterclockwise=False"
             ),
@@ -498,7 +501,7 @@ def test_arc(widget, kwargs, args_repr, draw_kwargs):
         (
             {"x": 10, "y": 20, "radiusx": 30, "radiusy": 40, "counterclockwise": False},
             (
-                "x=10, y=20, radiusx=30, radiusy=40, "
+                "x=10.000, y=20.000, radiusx=30.000, radiusy=40.000, "
                 "rotation=0.000, startangle=0.000, endangle=6.283, "
                 "counterclockwise=False"
             ),
@@ -517,7 +520,7 @@ def test_arc(widget, kwargs, args_repr, draw_kwargs):
         (
             {"x": 10, "y": 20, "radiusx": 30, "radiusy": 40, "counterclockwise": True},
             (
-                "x=10, y=20, radiusx=30, radiusy=40, "
+                "x=10.000, y=20.000, radiusx=30.000, radiusy=40.000, "
                 "rotation=0.000, startangle=0.000, endangle=6.283, "
                 "counterclockwise=True"
             ),
@@ -545,7 +548,7 @@ def test_arc(widget, kwargs, args_repr, draw_kwargs):
                 "counterclockwise": True,
             },
             (
-                "x=10, y=20, radiusx=30, radiusy=40, "
+                "x=10.000, y=20.000, radiusx=30.000, radiusy=40.000, "
                 "rotation=1.234, startangle=2.345, endangle=3.456, "
                 "counterclockwise=True"
             ),
@@ -584,7 +587,7 @@ def test_rect(widget):
     draw_op = widget.context.rect(10, 20, 30, 40)
 
     assert_action_performed(widget, "redraw")
-    assert repr(draw_op) == "Rect(x=10, y=20, width=30, height=40)"
+    assert repr(draw_op) == "Rect(x=10.000, y=20.000, width=30.000, height=40.000)"
 
     # The first and last instructions push/pull the root context, and can be ignored.
     assert widget._impl.draw_instructions[1:-1] == [
@@ -618,7 +621,7 @@ SYSTEM_FONT_IMPL = Font(SYSTEM, SYSTEM_DEFAULT_FONT_SIZE)._impl
                 "font": SYSTEM_FONT_IMPL,
             },
             (
-                "text='Hello world', x=10, y=20, font=None, "
+                "text='Hello world', x=10.000, y=20.000, font=None, "
                 "baseline=Baseline.ALPHABETIC, line_height=None"
             ),
             {
@@ -642,7 +645,7 @@ SYSTEM_FONT_IMPL = Font(SYSTEM, SYSTEM_DEFAULT_FONT_SIZE)._impl
                 "font": SYSTEM_FONT_IMPL,
             },
             (
-                "text='Hello world', x=10, y=20, font=None, "
+                "text='Hello world', x=10.000, y=20.000, font=None, "
                 "baseline=Baseline.TOP, line_height=None"
             ),
             {
@@ -666,7 +669,7 @@ SYSTEM_FONT_IMPL = Font(SYSTEM, SYSTEM_DEFAULT_FONT_SIZE)._impl
                 "font": Font("Cutive", 42)._impl,
             },
             (
-                "text='Hello world', x=10, y=20, font=<Font: 42pt Cutive>, "
+                "text='Hello world', x=10.000, y=20.000, font=<Font: 42pt Cutive>, "
                 "baseline=Baseline.ALPHABETIC, line_height=None"
             ),
             {
@@ -690,7 +693,7 @@ SYSTEM_FONT_IMPL = Font(SYSTEM, SYSTEM_DEFAULT_FONT_SIZE)._impl
                 "font": SYSTEM_FONT_IMPL,
             },
             (
-                "text='Hello world', x=10, y=20, font=None, "
+                "text='Hello world', x=10.000, y=20.000, font=None, "
                 "baseline=Baseline.ALPHABETIC, line_height=1.500"
             ),
             {
@@ -763,7 +766,7 @@ def test_translate(widget):
     draw_op = widget.context.translate(10, 20)
 
     assert_action_performed(widget, "redraw")
-    assert repr(draw_op) == "Translate(tx=10, ty=20)"
+    assert repr(draw_op) == "Translate(tx=10.000, ty=20.000)"
 
     # The first and last instructions push/pull the root context, and can be ignored.
     assert widget._impl.draw_instructions[1:-1] == [
@@ -795,7 +798,7 @@ def test_reset_transform(widget):
             # When width and height aren't specified, the image's true dimensions are
             # supplied to the backend.
             {"x": 10, "y": 20, "width": 32, "height": 32},
-            "x=10, y=20, width=None, height=None",
+            "x=10.000, y=20.000, width=None, height=None",
             {
                 "x": 10,
                 "y": 20,
@@ -817,7 +820,7 @@ def test_reset_transform(widget):
                 "width": 100,
                 "height": 50,
             },
-            "x=10, y=20, width=100, height=50",
+            "x=10.000, y=20.000, width=100.000, height=50.000",
             {
                 "x": 10,
                 "y": 20,
@@ -857,16 +860,18 @@ def test_anticlockwise_deprecated(widget, value):
     )
 
     with pytest.warns(DeprecationWarning, match=match):
-        widget.context.arc(x=0, y=0, radius=10, anticlockwise=value)
+        widget.context.arc(x=0, y=0, radius=10.000, anticlockwise=value)
 
     with pytest.warns(DeprecationWarning, match=match):
-        Arc(x=0, y=0, radius=10, anticlockwise=value)
+        Arc(x=0, y=0, radius=10.000, anticlockwise=value)
 
     with pytest.warns(DeprecationWarning, match=match):
-        widget.context.ellipse(x=0, y=0, radiusx=10, radiusy=10, anticlockwise=value)
+        widget.context.ellipse(
+            x=0, y=0, radiusx=10.000, radiusy=10.000, anticlockwise=value
+        )
 
     with pytest.warns(DeprecationWarning, match=match):
-        Ellipse(x=0, y=0, radiusx=10, radiusy=10, anticlockwise=value)
+        Ellipse(x=0, y=0, radiusx=10.000, radiusy=10.000, anticlockwise=value)
 
 
 @pytest.mark.parametrize("anti", [True, False])
@@ -882,18 +887,18 @@ def test_anticlockwise_invalid(widget, anti, counter):
 
     with pytest.raises(TypeError, match=match):
         widget.context.arc(
-            x=0, y=0, radius=10, anticlockwise=anti, counterclockwise=counter
+            x=0, y=0, radius=10.000, anticlockwise=anti, counterclockwise=counter
         )
 
     with pytest.raises(TypeError, match=match):
-        Arc(x=0, y=0, radius=10, anticlockwise=anti, counterclockwise=counter)
+        Arc(x=0, y=0, radius=10.000, anticlockwise=anti, counterclockwise=counter)
 
     with pytest.raises(TypeError, match=match):
         widget.context.ellipse(
             x=0,
             y=0,
-            radiusx=10,
-            radiusy=10,
+            radiusx=10.000,
+            radiusy=10.000,
             anticlockwise=anti,
             counterclockwise=counter,
         )
@@ -902,8 +907,8 @@ def test_anticlockwise_invalid(widget, anti, counter):
         Ellipse(
             x=0,
             y=0,
-            radiusx=10,
-            radiusy=10,
+            radiusx=10.000,
+            radiusy=10.000,
             anticlockwise=anti,
             counterclockwise=counter,
         )

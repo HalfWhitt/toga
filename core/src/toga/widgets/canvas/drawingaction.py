@@ -48,26 +48,6 @@ def _determine_counterclockwise(anticlockwise, counterclockwise):
 ######################################################################
 
 
-def _validate_optional(name, typ, optional, value):
-    if optional and value is None:
-        return None
-    print(typ)
-    if typ != list[float] and isinstance(value, typ):
-        return value
-
-    try:
-        if typ is Color:
-            return Color.parse(value)
-        if typ == list[float]:
-            return [float(n) for n in value]
-        return typ(value)
-
-    except (ValueError, TypeError) as exc:
-        raise ValueError(
-            f"Invalid value for {name}: {value}. Should be: {typ}"
-        ) from exc
-
-
 class DrawingAction(ABC):
     """A drawing operation in a [`Context`][toga.widgets.canvas.Context].
 
@@ -119,7 +99,7 @@ class DrawingAction(ABC):
                         optional = True
 
                     validators[field.name] = partial(
-                        _validate_optional,
+                        self._validate,
                         field.name,
                         typ,
                         optional,
@@ -134,6 +114,26 @@ class DrawingAction(ABC):
                 value = validate(value)
 
         super().__setattr__(name, value)
+
+    @staticmethod
+    def _validate(name, typ, optional, value):
+        if optional and value is None:
+            return None
+        # Can't use isinstance with parametrized types
+        if typ != list[float] and isinstance(value, typ):
+            return value
+
+        try:
+            if typ is Color:
+                return Color.parse(value)
+            if typ == list[float]:
+                return [float(n) for n in value]
+            return typ(value)
+
+        except (ValueError, TypeError) as exc:
+            raise ValueError(
+                f"Invalid value for {name}: {value}. Should be: {typ}"
+            ) from exc
 
     def __repr__(self) -> str:
         if is_dataclass(self):

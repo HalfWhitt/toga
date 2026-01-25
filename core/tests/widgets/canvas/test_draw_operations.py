@@ -860,18 +860,16 @@ def test_anticlockwise_deprecated(widget, value):
     )
 
     with pytest.warns(DeprecationWarning, match=match):
-        widget.context.arc(x=0, y=0, radius=10.000, anticlockwise=value)
+        widget.context.arc(x=0, y=0, radius=10, anticlockwise=value)
 
     with pytest.warns(DeprecationWarning, match=match):
-        Arc(x=0, y=0, radius=10.000, anticlockwise=value)
+        Arc(x=0, y=0, radius=10, anticlockwise=value)
 
     with pytest.warns(DeprecationWarning, match=match):
-        widget.context.ellipse(
-            x=0, y=0, radiusx=10.000, radiusy=10.000, anticlockwise=value
-        )
+        widget.context.ellipse(x=0, y=0, radiusx=10, radiusy=10, anticlockwise=value)
 
     with pytest.warns(DeprecationWarning, match=match):
-        Ellipse(x=0, y=0, radiusx=10.000, radiusy=10.000, anticlockwise=value)
+        Ellipse(x=0, y=0, radiusx=10, radiusy=10, anticlockwise=value)
 
 
 @pytest.mark.parametrize("anti", [True, False])
@@ -887,18 +885,18 @@ def test_anticlockwise_invalid(widget, anti, counter):
 
     with pytest.raises(TypeError, match=match):
         widget.context.arc(
-            x=0, y=0, radius=10.000, anticlockwise=anti, counterclockwise=counter
+            x=0, y=0, radius=10, anticlockwise=anti, counterclockwise=counter
         )
 
     with pytest.raises(TypeError, match=match):
-        Arc(x=0, y=0, radius=10.000, anticlockwise=anti, counterclockwise=counter)
+        Arc(x=0, y=0, radius=10, anticlockwise=anti, counterclockwise=counter)
 
     with pytest.raises(TypeError, match=match):
         widget.context.ellipse(
             x=0,
             y=0,
-            radiusx=10.000,
-            radiusy=10.000,
+            radiusx=10,
+            radiusy=10,
             anticlockwise=anti,
             counterclockwise=counter,
         )
@@ -907,8 +905,8 @@ def test_anticlockwise_invalid(widget, anti, counter):
         Ellipse(
             x=0,
             y=0,
-            radiusx=10.000,
-            radiusy=10.000,
+            radiusx=10,
+            radiusy=10,
             anticlockwise=anti,
             counterclockwise=counter,
         )

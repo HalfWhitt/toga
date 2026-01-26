@@ -4,13 +4,7 @@ import toga
 from toga.colors import rgb
 from toga.constants import FillRule
 from toga.fonts import SYSTEM, SYSTEM_DEFAULT_FONT_SIZE, Font
-from toga.widgets.canvas import (
-    ClosedPathContext,
-    DrawingAction,
-    FillContext,
-    State,
-    StrokeContext,
-)
+from toga.widgets.canvas import ClosePath, DrawingAction, Fill, State, Stroke
 from toga_dummy.utils import assert_action_not_performed, assert_action_performed
 
 REBECCA_PURPLE_COLOR = rgb(102, 51, 153)
@@ -97,9 +91,9 @@ def test_redraw(widget):
 
 def test_closed_path(widget):
     """A canvas can produce a ClosedPath sub-state."""
-    with widget.ClosedPath(x=10, y=20) as closed_path:
+    with widget.close_path(x=10, y=20) as closed_path:
         # A fresh state has been created as a sub-state of the canvas.
-        assert isinstance(closed_path, ClosedPathContext)
+        assert isinstance(closed_path, ClosePath)
         assert closed_path is not widget.root_state
         assert closed_path.x == 10
         assert closed_path.y == 20
@@ -107,11 +101,11 @@ def test_closed_path(widget):
 
 def test_fill(widget):
     """A canvas can produce a Fill sub-state."""
-    with widget.Fill(
+    with widget.fill(
         x=10, y=20, color="rebeccapurple", fill_rule=FillRule.EVENODD
     ) as fill:
         # A fresh state has been created as a sub-state of the canvas.
-        assert isinstance(fill, FillContext)
+        assert isinstance(fill, Fill)
         assert fill is not widget.root_state
 
         assert fill.x == 10
@@ -122,11 +116,11 @@ def test_fill(widget):
 
 def test_stroke(widget):
     """A canvas can produce a Stroke sub-state."""
-    with widget.Stroke(
+    with widget.stroke(
         x=10, y=20, color="rebeccapurple", line_width=5, line_dash=[2, 7]
     ) as stroke:
         # A fresh state has been created as a sub-state of the canvas.
-        assert isinstance(stroke, StrokeContext)
+        assert isinstance(stroke, Stroke)
         assert stroke is not widget.root_state
 
         assert stroke.x == 10

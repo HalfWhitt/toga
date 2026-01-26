@@ -36,7 +36,6 @@ from .drawingaction import (
 if TYPE_CHECKING:
     from toga.colors import ColorT
 
-    from .canvas import Canvas
 
 # Make sure deprecation warnings are shown by default
 warnings.filterwarnings("default", category=DeprecationWarning)
@@ -457,7 +456,7 @@ class DrawingActionDispatch:
         :return: Yields the [`ClosedPathContext`][toga.widgets.canvas.ClosedPathContext]
             state object.
         """
-        closed_path = ClosedPathContext(canvas=self.canvas, x=x, y=y)
+        closed_path = ClosedPathContext(x=x, y=y)
         self._action_target.append(closed_path)
         yield closed_path
 
@@ -492,7 +491,6 @@ class DrawingActionDispatch:
             object.
         """
         fill = FillContext(
-            canvas=self.canvas,
             x=x,
             y=y,
             color=color,
@@ -534,7 +532,6 @@ class DrawingActionDispatch:
             state object.
         """
         stroke = StrokeContext(
-            canvas=self.canvas,
             x=x,
             y=y,
             color=color,
@@ -554,10 +551,23 @@ class State(DrawingAction, DrawingActionDispatch):
     root state of the canvas.
     """
 
-    def __init__(self, canvas: toga.Canvas, **kwargs: Any):
-        # kwargs used to support multiple inheritance
-        super().__init__(**kwargs)
-        self._canvas = canvas
+    def __init__(
+        self,
+        canvas: toga.Canvas | None = None,  # DEPRECATED
+    ):
+        ######################################################################
+        # 2026-1: Backwards compatibility for < 0.5.3
+        ######################################################################
+        if canvas is not None:
+            # warnings.warn(
+            #     "The canvas parameter to State.__init__() is deprecated.",
+            #     DeprecationWarning,
+            #     stacklevel=2,
+            # )
+            pass
+        ######################################################################
+        # End backwards compatibility
+        ######################################################################
         self.drawing_actions: list[DrawingAction] = []
 
     def _draw(self, context: Any) -> None:
@@ -576,13 +586,13 @@ class State(DrawingAction, DrawingActionDispatch):
     ###########################################################################
 
     @property
-    def canvas(self) -> Canvas:
+    def canvas(self) -> None:
         """The canvas that is associated with this drawing state."""
-        return self._canvas
+        raise RuntimeError("States no longer hold a reference to their canvas.")
 
     def redraw(self) -> None:
         """Calls [`Canvas.redraw`][toga.Canvas.redraw] on the parent Canvas."""
-        self.canvas.redraw()
+        raise RuntimeError("States no longer hold a reference to their canvas.")
 
     ###########################################################################
     # Operations on drawing objects
@@ -648,11 +658,10 @@ class ClosedPathContext(State):
 
     def __init__(
         self,
-        canvas: toga.Canvas,
         x: float | None = None,
         y: float | None = None,
     ):
-        super().__init__(canvas=canvas)
+        super().__init__()
         self.x = x
         self.y = y
 
@@ -697,13 +706,12 @@ class FillContext(ClosedPathContext):
 
     def __init__(
         self,
-        canvas: toga.Canvas,
         x: float | None = None,
         y: float | None = None,
         color: ColorT | None = None,
         fill_rule: FillRule = FillRule.NONZERO,
     ):
-        super().__init__(canvas=canvas, x=x, y=y)
+        super().__init__(x=x, y=y)
         self.color = color
         self.fill_rule = fill_rule
 
@@ -763,14 +771,13 @@ class StrokeContext(ClosedPathContext):
 
     def __init__(
         self,
-        canvas: toga.Canvas,
         x: float | None = None,
         y: float | None = None,
         color: ColorT | None = None,
         line_width: float | None = None,
         line_dash: list[float] | None = None,
     ):
-        super().__init__(canvas=canvas, x=x, y=y)
+        super().__init__(x=x, y=y)
         self.color = color
         self.line_width = line_width
         self.line_dash = line_dash

@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from dataclasses import InitVar, dataclass, fields, is_dataclass
 from enum import Enum
 from math import pi
-from typing import TYPE_CHECKING, Any
+from typing import Any
 from warnings import filterwarnings, warn
 
 from toga.colors import Color
@@ -15,9 +15,6 @@ from toga.fonts import (
     Font,
 )
 from toga.images import Image
-
-if TYPE_CHECKING:
-    pass
 
 # Make sure deprecation warnings are shown by default
 filterwarnings("default", category=DeprecationWarning)

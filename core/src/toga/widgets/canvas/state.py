@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import warnings
+from contextlib import AbstractContextManager as ContextManager
 from dataclasses import dataclass
 from math import pi
 from typing import TYPE_CHECKING, Any
@@ -450,7 +451,7 @@ class DrawingActionDispatch:
     # Sub-states of this state
     ###########################################################################
 
-    def state(self) -> State:
+    def state(self) -> ContextManager[State]:
         """Construct and yield a new sub-[`State`][toga.widgets.canvas.State] within
         this state.
 
@@ -460,7 +461,7 @@ class DrawingActionDispatch:
         self._action_target.append(state)
         return state
 
-    def Context(self) -> State:
+    def Context(self) -> ContextManager[State]:
         warnings.warn(
             "State.Context() has been renamed to State.state()",
             DeprecationWarning,

@@ -61,22 +61,14 @@ class StartApp(toga.App):
             self.canvas.arc(88, 97, 3)
 
     def draw_horns(self):
-        with self.canvas.root_state.state():
+        with self.canvas.stroke(line_width=4.0):
             with self.canvas.fill(color=rgb(212, 212, 212)):
-                self.canvas.move_to(112, 99)
-                self.canvas.quadratic_curve_to(145, 65, 139, 36)
-                self.canvas.quadratic_curve_to(130, 60, 109, 75)
-            with self.canvas.stroke(line_width=4.0):
                 self.canvas.move_to(112, 99)
                 self.canvas.quadratic_curve_to(145, 65, 139, 36)
                 self.canvas.quadratic_curve_to(130, 60, 109, 75)
 
-        with self.canvas.root_state.state():
+        with self.canvas.stroke(line_width=4.0):
             with self.canvas.fill(color=rgb(212, 212, 212)):
-                self.canvas.move_to(35, 99)
-                self.canvas.quadratic_curve_to(2, 65, 6, 36)
-                self.canvas.quadratic_curve_to(17, 60, 37, 75)
-            with self.canvas.stroke(line_width=4.0):
                 self.canvas.move_to(35, 99)
                 self.canvas.quadratic_curve_to(2, 65, 6, 36)
                 self.canvas.quadratic_curve_to(17, 60, 37, 75)

@@ -19,7 +19,7 @@ from toga.fonts import (
 from toga.handlers import wrapped_handler
 
 from ..base import StyleT, Widget
-from .state import ClosedPathContext, FillContext, State, StrokeContext
+from .state import ClosePath, DrawingActionDispatch, Fill, State, Stroke
 
 if TYPE_CHECKING:
     from toga.colors import ColorT
@@ -52,7 +52,7 @@ class OnResizeHandler(Protocol):
         """
 
 
-class Canvas(Widget):
+class Canvas(Widget, DrawingActionDispatch):
     _MIN_WIDTH = 0
     _MIN_HEIGHT = 0
 
@@ -88,7 +88,7 @@ class Canvas(Widget):
         :param on_alt_drag: Initial [`on_alt_drag`][toga.Canvas.on_alt_drag] handler.
         :param kwargs: Initial style properties.
         """
-        self._state = State(canvas=self)
+        self._state = State()
 
         super().__init__(id, style, **kwargs)
 
@@ -135,6 +135,25 @@ class Canvas(Widget):
         )
         return self._state
 
+    @property
+    def _action_target(self):
+        """Return the currently active state."""
+        state = self.root_state
+
+        while state.drawing_actions:
+            for action in reversed(state.drawing_actions):
+                # Look through its drawing actions, from the bottom up.
+                if getattr(action, "_is_open", False):
+                    # If it's currently open as a context manager, assign it to state
+                    # and break out of the for loop.
+                    state = action
+                    break
+            # If none of the drawing actions were open, break out of the while loop.
+            else:
+                break
+
+        return state
+
     def redraw(self) -> None:
         """Redraw the Canvas.
 
@@ -161,7 +180,7 @@ class Canvas(Widget):
         self,
         x: float | None = None,
         y: float | None = None,
-    ) -> ContextManager[ClosedPathContext]:
+    ) -> ContextManager[ClosePath]:
         """Construct and yield a new
         [`ClosedPathContext`][toga.widgets.canvas.ClosedPathContext]
         state in the root state of this canvas.
@@ -171,7 +190,7 @@ class Canvas(Widget):
         :return: Yields the new
             [`ClosedPathContext`][toga.widgets.canvas.ClosedPathContext] state object.
         """
-        return self.root_state.ClosedPath(x, y)
+        return self.root_state.close_path(x, y)
 
     def Fill(
         self,
@@ -179,7 +198,7 @@ class Canvas(Widget):
         y: float | None = None,
         color: ColorT | None = None,
         fill_rule: FillRule = FillRule.NONZERO,
-    ) -> ContextManager[FillContext]:
+    ) -> ContextManager[Fill]:
         """Construct and yield a new [`FillContext`][toga.widgets.canvas.FillContext]
         in the root state of this canvas.
 
@@ -197,7 +216,7 @@ class Canvas(Widget):
         :return class: Yields the new [`FillContext`][toga.widgets.canvas.FillContext]
             state object.
         """
-        return self.root_state.Fill(x, y, color, fill_rule)
+        return self.root_state.fill(x, y, color, fill_rule)
 
     def Stroke(
         self,
@@ -206,7 +225,7 @@ class Canvas(Widget):
         color: ColorT | None = None,
         line_width: float | None = None,
         line_dash: list[float] | None = None,
-    ) -> ContextManager[StrokeContext]:
+    ) -> ContextManager[Stroke]:
         """Construct and yield a new
         [`StrokeContext`][toga.widgets.canvas.StrokeContext] in the
         root state of this canvas.
@@ -223,7 +242,7 @@ class Canvas(Widget):
         :return: Yields the new
             [`StrokeContext`][toga.widgets.canvas.StrokeContext] state object.
         """
-        return self.root_state.Stroke(x, y, color, line_width, line_dash)
+        return self.root_state.stroke(x, y, color, line_width, line_dash)
 
     @property
     def on_resize(self) -> OnResizeHandler:

@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Any
 from warnings import filterwarnings, warn
 
 from toga.colors import Color
-from toga.constants import Baseline, FillRule
+from toga.constants import Baseline
 from toga.fonts import (
     SYSTEM,
     SYSTEM_DEFAULT_FONT_SIZE,
@@ -17,7 +17,7 @@ from toga.fonts import (
 from toga.images import Image
 
 if TYPE_CHECKING:
-    from toga.colors import ColorT
+    pass
 
 # Make sure deprecation warnings are shown by default
 filterwarnings("default", category=DeprecationWarning)
@@ -132,42 +132,6 @@ class color_property:
 class BeginPath(DrawingAction):
     def _draw(self, context: Any) -> None:
         context.begin_path()
-
-
-class ClosePath(DrawingAction):
-    def _draw(self, context: Any) -> None:
-        context.close_path()
-
-
-@dataclass(repr=False)
-class Fill(DrawingAction):
-    color: ColorT | None = color_property()
-    fill_rule: FillRule = FillRule.NONZERO
-
-    def _draw(self, context: Any) -> None:
-        context.save()
-        if self.color is not None:
-            context.set_fill_style(self.color)
-        context.fill(self.fill_rule)
-        context.restore()
-
-
-@dataclass(repr=False)
-class Stroke(DrawingAction):
-    color: ColorT | None = color_property()
-    line_width: float | None = None
-    line_dash: list[float] | None = None
-
-    def _draw(self, context: Any) -> None:
-        context.save()
-        if self.color is not None:
-            context.set_stroke_style(self.color)
-        if self.line_width is not None:
-            context.set_line_width(self.line_width)
-        if self.line_dash is not None:
-            context.set_line_dash(self.line_dash)
-        context.stroke()
-        context.restore()
 
 
 @dataclass(repr=False)

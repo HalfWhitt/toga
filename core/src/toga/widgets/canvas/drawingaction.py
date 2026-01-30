@@ -105,6 +105,11 @@ class DrawingAction:
 
         return f"{type(self).__name__}({parenthetical})"
 
+    def __contains__(self, other):
+        return hasattr(self, "drawing_actions") and any(
+            action is other or other in action for action in self.drawing_actions
+        )
+
     def _draw(self, context: Any) -> None:
         """Called by parent state to execute this drawing action."""
         raise NotImplementedError

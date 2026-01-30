@@ -582,7 +582,12 @@ class State(DrawingAction, DrawingActionDispatch):
 
     def redraw(self) -> None:
         """Calls [`Canvas.redraw`][toga.Canvas.redraw] on the parent Canvas."""
-        self.canvas.redraw()
+        from .canvas import Canvas
+
+        for ref in Canvas._instances:
+            if canvas := ref():
+                if self is canvas.root_state or self in canvas.root_state:
+                    canvas.redraw()
 
     ###########################################################################
     # Operations on drawing objects

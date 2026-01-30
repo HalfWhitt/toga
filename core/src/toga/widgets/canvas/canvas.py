@@ -8,6 +8,7 @@ from typing import (
     Literal,
     Protocol,
 )
+from weakref import ref
 
 import toga
 from toga.constants import FillRule
@@ -56,6 +57,9 @@ class Canvas(Widget):
     _MIN_WIDTH = 0
     _MIN_HEIGHT = 0
 
+    # 2026-01: Backwards compatibility for <= 0.5.3
+    _instances: list[ref] = []
+
     def __init__(
         self,
         id: str | None = None,
@@ -101,6 +105,9 @@ class Canvas(Widget):
         self.on_alt_press = on_alt_press
         self.on_alt_release = on_alt_release
         self.on_alt_drag = on_alt_drag
+
+        # 2026-01: Backwards compatibility for <= 0.5.3
+        self._instances.append(ref(self))
 
     def _create(self) -> Any:
         return self.factory.Canvas(interface=self)

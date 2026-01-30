@@ -6,6 +6,7 @@ from toga.widgets.canvas import (
     ClosedPathContext,
     FillContext,
     LineTo,
+    Scale,
     State,
     StrokeContext,
 )
@@ -548,3 +549,20 @@ def test_order_change(widget):
         ("line to", {"x": 99, "y": 99}),
         "restore",
     ]
+
+
+def test_contains(widget):
+    """Whether a drawing action is in a state can be tested."""
+    with widget.Stroke() as stroke:
+        reset_transform = stroke.reset_transform()
+        with stroke.Fill() as fill:
+            line_to = fill.line_to(0, 0)
+        close_path = stroke.close_path()
+
+    scale = Scale(1, 1)
+
+    for action in [stroke, reset_transform, fill, line_to, close_path]:
+        assert action in widget.root_state
+
+    assert close_path not in fill
+    assert scale not in widget.root_state

@@ -580,6 +580,10 @@ class State(DrawingAction, DrawingActionDispatch):
         """The canvas that is associated with this drawing state."""
         return self._canvas
 
+    ######################################################################
+    # 2026-1: Backwards compatibility for Toga <= 0.5.3
+    ######################################################################
+
     def redraw(self) -> None:
         """Calls [`Canvas.redraw`][toga.Canvas.redraw] on the parent Canvas."""
         from .canvas import Canvas
@@ -588,6 +592,10 @@ class State(DrawingAction, DrawingActionDispatch):
             if canvas := ref():
                 if self is canvas.root_state or self in canvas.root_state:
                     canvas.redraw()
+
+    ######################################################################
+    # End backwards compatibility
+    ######################################################################
 
     ###########################################################################
     # Operations on drawing objects

@@ -24,10 +24,14 @@ from .state import ClosePath, Fill, State, Stroke
 warnings.filterwarnings("default", category=DeprecationWarning)
 
 _deprecated_names = {
-    # Jan 2026: DrawingAction was named DrawingObject, and State was named Context, in
-    # Toga 0.5.3 and earlier.
+    # Jan 2026: The following have different names than they did in Toga 0.5.3 and
+    # earlier.
     "DrawingObject": DrawingAction,
     "Context": State,
+    # No one should be using these directly anyway, but just in case...
+    "ClosedPathContext": ClosePath,
+    "FillContext": Fill,
+    "StrokeContext": Stroke,
 }
 
 

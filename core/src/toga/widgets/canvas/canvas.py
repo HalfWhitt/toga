@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import warnings
-from contextlib import AbstractContextManager as ContextManager
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -11,7 +10,6 @@ from typing import (
 from weakref import ref
 
 import toga
-from toga.constants import FillRule
 from toga.fonts import (
     SYSTEM,
     SYSTEM_DEFAULT_FONT_SIZE,
@@ -20,10 +18,9 @@ from toga.fonts import (
 from toga.handlers import wrapped_handler
 
 from ..base import StyleT, Widget
-from .state import ClosePath, DrawingActionDispatch, Fill, State, Stroke
+from .state import DrawingActionDispatch, State
 
 if TYPE_CHECKING:
-    from toga.colors import ColorT
     from toga.images import ImageT
 
 # Make sure deprecation warnings are shown by default
@@ -133,6 +130,10 @@ class Canvas(Widget, DrawingActionDispatch):
         """The root state for the canvas."""
         return self._state
 
+    ######################################################################
+    # 2026-01: Backwards compatibility for <= 0.5.3
+    ######################################################################
+
     @property
     def context(self) -> State:
         warnings.warn(
@@ -141,6 +142,10 @@ class Canvas(Widget, DrawingActionDispatch):
             stacklevel=2,
         )
         return self._state
+
+    ######################################################################
+    # End backwards compatibility
+    ######################################################################
 
     @property
     def _action_target(self):
@@ -161,95 +166,14 @@ class Canvas(Widget, DrawingActionDispatch):
 
         return state
 
-    def redraw(self, _warn=False) -> None:
+    def redraw(self) -> None:
         """Redraw the Canvas.
 
-        The Canvas will be automatically redrawn after adding or removing a drawing
-        object, or when the Canvas resizes. However, when you modify the properties of a
-        drawing object, you must call `redraw` manually.
+        The Canvas will be automatically redrawn after calling its drawing methods.
+        However, when you manually add, remove, or modify a drawing object, you must
+        call `redraw` manually.
         """
         self._impl.redraw()
-
-    def Context(self) -> ContextManager[State]:
-        """Construct and yield a new sub-[`State`][toga.widgets.canvas.State] within
-        the root state of this Canvas.
-
-        :return: Yields the new [`State`][toga.widgets.canvas.State] object.
-        """
-        warnings.warn(
-            "Canvas.Context() is deprecated. Use Canvas.root_state.state() instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return self.root_state.state()
-
-    def ClosedPath(
-        self,
-        x: float | None = None,
-        y: float | None = None,
-    ) -> ContextManager[ClosePath]:
-        """Construct and yield a new
-        [`ClosedPathContext`][toga.widgets.canvas.ClosedPathContext]
-        state in the root state of this canvas.
-
-        :param x: The x coordinate of the path's starting point.
-        :param y: The y coordinate of the path's starting point.
-        :return: Yields the new
-            [`ClosedPathContext`][toga.widgets.canvas.ClosedPathContext] state object.
-        """
-        return self.root_state.close_path(x, y)
-
-    def Fill(
-        self,
-        x: float | None = None,
-        y: float | None = None,
-        color: ColorT | None = None,
-        fill_rule: FillRule = FillRule.NONZERO,
-    ) -> ContextManager[Fill]:
-        """Construct and yield a new [`FillContext`][toga.widgets.canvas.FillContext]
-        in the root state of this canvas.
-
-        A drawing operator that fills the path constructed in the state according to
-        the current fill rule.
-
-        If both an x and y coordinate is provided, the drawing state will begin with
-        a `move_to` operation in that state.
-
-        :param x: The x coordinate of the path's starting point.
-        :param y: The y coordinate of the path's starting point.
-        :param fill_rule: `nonzero` is the non-zero winding rule; `evenodd` is the
-            even-odd winding rule.
-        :param color: The fill color.
-        :return class: Yields the new [`FillContext`][toga.widgets.canvas.FillContext]
-            state object.
-        """
-        return self.root_state.fill(x, y, color, fill_rule)
-
-    def Stroke(
-        self,
-        x: float | None = None,
-        y: float | None = None,
-        color: ColorT | None = None,
-        line_width: float | None = None,
-        line_dash: list[float] | None = None,
-    ) -> ContextManager[Stroke]:
-        """Construct and yield a new
-        [`StrokeContext`][toga.widgets.canvas.StrokeContext] in the
-        root state of this canvas.
-
-        If both an x and y coordinate is provided, the drawing state will begin with
-        a `move_to` operation in that state.
-
-        :param x: The x coordinate of the path's starting point.
-        :param y: The y coordinate of the path's starting point.
-        :param color: The color for the stroke.
-        :param line_width: The width of the stroke.
-        :param line_dash: The dash pattern to follow when drawing the line. Default is a
-            solid line.
-        :return: Yields the new
-            [`StrokeContext`][toga.widgets.canvas.StrokeContext] state object.
-        """
-        return self.root_state.stroke(x, y, color, line_width, line_dash)
 
     @property
     def on_resize(self) -> OnResizeHandler:

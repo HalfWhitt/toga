@@ -57,7 +57,9 @@ class DrawingActionDispatch:
         """
         begin_path = BeginPath()
         self._action_target.append(begin_path)
-        self.redraw(_warn=False)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", DeprecationWarning)
+            self.redraw()
         return begin_path
 
     def close_path(self, x: float | None = None, y: float | None = None) -> ClosePath:
@@ -73,7 +75,9 @@ class DrawingActionDispatch:
         """
         close_path = ClosePath(x=x, y=y)
         self._action_target.append(close_path)
-        self.redraw(_warn=False)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", DeprecationWarning)
+            self.redraw()
         return close_path
 
     def move_to(self, x: float, y: float) -> MoveTo:
@@ -86,7 +90,9 @@ class DrawingActionDispatch:
         """
         move_to = MoveTo(x, y)
         self._action_target.append(move_to)
-        self.redraw(_warn=False)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", DeprecationWarning)
+            self.redraw()
         return move_to
 
     def line_to(self, x: float, y: float) -> LineTo:
@@ -99,7 +105,9 @@ class DrawingActionDispatch:
         """
         line_to = LineTo(x, y)
         self._action_target.append(line_to)
-        self.redraw(_warn=False)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", DeprecationWarning)
+            self.redraw()
         return line_to
 
     def bezier_curve_to(
@@ -129,7 +137,9 @@ class DrawingActionDispatch:
         """
         bezier_curve_to = BezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y)
         self._action_target.append(bezier_curve_to)
-        self.redraw(_warn=False)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", DeprecationWarning)
+            self.redraw()
         return bezier_curve_to
 
     def quadratic_curve_to(
@@ -157,7 +167,9 @@ class DrawingActionDispatch:
         """
         quadratic_curve_to = QuadraticCurveTo(cpx, cpy, x, y)
         self._action_target.append(quadratic_curve_to)
-        self.redraw(_warn=False)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", DeprecationWarning)
+            self.redraw()
         return quadratic_curve_to
 
     def arc(
@@ -189,7 +201,9 @@ class DrawingActionDispatch:
         """
         arc = Arc(x, y, radius, startangle, endangle, counterclockwise, anticlockwise)
         self._action_target.append(arc)
-        self.redraw(_warn=False)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", DeprecationWarning)
+            self.redraw()
         return arc
 
     def ellipse(
@@ -237,7 +251,9 @@ class DrawingActionDispatch:
             anticlockwise,
         )
         self._action_target.append(ellipse)
-        self.redraw(_warn=False)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", DeprecationWarning)
+            self.redraw()
         return ellipse
 
     def rect(self, x: float, y: float, width: float, height: float) -> Rect:
@@ -252,8 +268,9 @@ class DrawingActionDispatch:
         """
         rect = Rect(x, y, width, height)
         self._action_target.append(rect)
-        if not isinstance(self, State):
-            self.redraw(_warn=False)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", DeprecationWarning)
+            self.redraw()
         return rect
 
     def fill(
@@ -278,7 +295,9 @@ class DrawingActionDispatch:
         """
         fill = Fill(color, fill_rule, x, y)
         self._action_target.append(fill)
-        self.redraw(_warn=False)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", DeprecationWarning)
+            self.redraw()
         return fill
 
     def stroke(
@@ -300,7 +319,9 @@ class DrawingActionDispatch:
         """
         stroke = Stroke(color, line_width, line_dash, x, y)
         self._action_target.append(stroke)
-        self.redraw(_warn=False)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", DeprecationWarning)
+            self.redraw()
         return stroke
 
     ###########################################################################
@@ -334,7 +355,9 @@ class DrawingActionDispatch:
         """
         write_text = WriteText(text, x, y, font, baseline, line_height)
         self._action_target.append(write_text)
-        self.redraw(_warn=False)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", DeprecationWarning)
+            self.redraw()
         return write_text
 
     ###########################################################################
@@ -376,7 +399,9 @@ class DrawingActionDispatch:
         """
         draw_image = DrawImage(image, x, y, width, height)
         self._action_target.append(draw_image)
-        self.redraw(_warn=False)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", DeprecationWarning)
+            self.redraw()
         return draw_image
 
     ###########################################################################
@@ -391,7 +416,9 @@ class DrawingActionDispatch:
         """
         rotate = Rotate(radians)
         self._action_target.append(rotate)
-        self.redraw(_warn=False)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", DeprecationWarning)
+            self.redraw()
         return rotate
 
     def scale(self, sx: float, sy: float) -> Scale:
@@ -406,7 +433,9 @@ class DrawingActionDispatch:
         """
         scale = Scale(sx, sy)
         self._action_target.append(scale)
-        self.redraw(_warn=False)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", DeprecationWarning)
+            self.redraw()
         return scale
 
     def translate(self, tx: float, ty: float) -> Translate:
@@ -419,7 +448,9 @@ class DrawingActionDispatch:
         """
         translate = Translate(tx, ty)
         self._action_target.append(translate)
-        self.redraw(_warn=False)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", DeprecationWarning)
+            self.redraw()
         return translate
 
     def reset_transform(self) -> ResetTransform:
@@ -430,7 +461,9 @@ class DrawingActionDispatch:
         """
         reset_transform = ResetTransform()
         self._action_target.append(reset_transform)
-        self.redraw(_warn=False)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", DeprecationWarning)
+            self.redraw()
         return reset_transform
 
     ###########################################################################
@@ -445,12 +478,17 @@ class DrawingActionDispatch:
         """
         state = State()
         self._action_target.append(state)
-        self.redraw(_warn=False)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", DeprecationWarning)
+            self.redraw()
         return state
 
     ######################################################################
     # 2026-01: Backwards compatibility for <= 0.5.3
     ######################################################################
+
+    # Each of these CamelCase methods, when called on a State, added to that State.
+    # However, when called on a Canvas, they added to that Canvas's root_state.
 
     def Context(self) -> ContextManager[State]:
         warnings.warn(
@@ -458,7 +496,9 @@ class DrawingActionDispatch:
             DeprecationWarning,
             stacklevel=2,
         )
-        return self.state()
+        target = self if isinstance(self, State) else self.root_state
+
+        return target.state()
 
     def ClosedPath(
         self,
@@ -473,7 +513,9 @@ class DrawingActionDispatch:
             DeprecationWarning,
             stacklevel=2,
         )
-        return self.close_path(x=x, y=y)
+        target = self if isinstance(self, State) else self.root_state
+
+        return target.close_path(x=x, y=y)
 
     def Fill(
         self,
@@ -491,7 +533,9 @@ class DrawingActionDispatch:
             DeprecationWarning,
             stacklevel=2,
         )
-        return self.close_path(fill_rule=fill_rule, color=color, x=x, y=y)
+        target = self if isinstance(self, State) else self.root_state
+
+        return target.close_path(fill_rule=fill_rule, color=color, x=x, y=y)
 
     def Stroke(
         self,
@@ -510,7 +554,9 @@ class DrawingActionDispatch:
             DeprecationWarning,
             stacklevel=2,
         )
-        return self.close_path(
+        target = self if isinstance(self, State) else self.root_state
+
+        return target.close_path(
             color=color,
             line_width=line_width,
             line_dash=line_dash,
@@ -575,16 +621,15 @@ class State(DrawingAction, DrawingActionDispatch):
                 if self is canvas.root_state or self in canvas.root_state:
                     return canvas
 
-    def redraw(self, _warn=True) -> None:
-        if _warn:
-            warnings.warn(
-                (
-                    "State.redraw() is deprecated. Call the canvas's redraw() method "
-                    "instead."
-                ),
-                DeprecationWarning,
-                stacklevel=2,
-            )
+    def redraw(self) -> None:
+        warnings.warn(
+            (
+                "State.redraw() is deprecated. Call the canvas's redraw() method "
+                "instead."
+            ),
+            DeprecationWarning,
+            stacklevel=2,
+        )
 
         from .canvas import Canvas
 

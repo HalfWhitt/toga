@@ -161,7 +161,7 @@ class Canvas(Widget, DrawingActionDispatch):
 
         return state
 
-    def redraw(self) -> None:
+    def redraw(self, _warn=False) -> None:
         """Redraw the Canvas.
 
         The Canvas will be automatically redrawn after adding or removing a drawing

@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import InitVar, dataclass, fields, is_dataclass
 from enum import Enum
 from math import pi
-from typing import Any
+from typing import TYPE_CHECKING, Any
 from warnings import filterwarnings, warn
 
 from toga.colors import Color
@@ -14,6 +14,9 @@ from toga.fonts import (
     Font,
 )
 from toga.images import Image
+
+if TYPE_CHECKING:
+    from toga.constants import Baseline
 
 # Make sure deprecation warnings are shown by default
 filterwarnings("default", category=DeprecationWarning)
@@ -102,7 +105,7 @@ class DrawingAction:
 
         return f"{type(self).__name__}({parenthetical})"
 
-    def __contains__(self, other):
+    def __contains__(self, other: DrawingAction):
         return hasattr(self, "drawing_actions") and any(
             action is other or other in action for action in self.drawing_actions
         )

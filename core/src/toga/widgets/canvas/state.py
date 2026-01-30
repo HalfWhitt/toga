@@ -3,11 +3,9 @@ from __future__ import annotations
 import warnings
 from contextlib import AbstractContextManager as ContextManager
 from dataclasses import dataclass, field
-from itertools import zip_longest
 from math import pi
 from typing import TYPE_CHECKING, Any
 
-from toga.colors import Color
 from toga.constants import Baseline, FillRule
 from toga.fonts import Font
 from toga.images import Image
@@ -34,6 +32,8 @@ from .drawingaction import (
 if TYPE_CHECKING:
     from toga.colors import ColorT
 
+    from .canvas import Canvas
+
 
 # Make sure deprecation warnings are shown by default
 warnings.filterwarnings("default", category=DeprecationWarning)
@@ -57,8 +57,7 @@ class DrawingActionDispatch:
         """
         begin_path = BeginPath()
         self._action_target.append(begin_path)
-        if not isinstance(self, State):
-            self.redraw()
+        self.redraw(_warn=False)
         return begin_path
 
     def close_path(self, x: float | None = None, y: float | None = None) -> ClosePath:
@@ -72,10 +71,9 @@ class DrawingActionDispatch:
         :returns: The `ClosePath`
             [`DrawingAction`][toga.widgets.canvas.DrawingAction] for the operation.
         """
-        close_path = ClosePath(x, y)
+        close_path = ClosePath(x=x, y=y)
         self._action_target.append(close_path)
-        if not isinstance(self, State):
-            self.redraw()
+        self.redraw(_warn=False)
         return close_path
 
     def move_to(self, x: float, y: float) -> MoveTo:
@@ -88,8 +86,7 @@ class DrawingActionDispatch:
         """
         move_to = MoveTo(x, y)
         self._action_target.append(move_to)
-        if not isinstance(self, State):
-            self.redraw()
+        self.redraw(_warn=False)
         return move_to
 
     def line_to(self, x: float, y: float) -> LineTo:
@@ -102,8 +99,7 @@ class DrawingActionDispatch:
         """
         line_to = LineTo(x, y)
         self._action_target.append(line_to)
-        if not isinstance(self, State):
-            self.redraw()
+        self.redraw(_warn=False)
         return line_to
 
     def bezier_curve_to(
@@ -133,8 +129,7 @@ class DrawingActionDispatch:
         """
         bezier_curve_to = BezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y)
         self._action_target.append(bezier_curve_to)
-        if not isinstance(self, State):
-            self.redraw()
+        self.redraw(_warn=False)
         return bezier_curve_to
 
     def quadratic_curve_to(
@@ -162,8 +157,7 @@ class DrawingActionDispatch:
         """
         quadratic_curve_to = QuadraticCurveTo(cpx, cpy, x, y)
         self._action_target.append(quadratic_curve_to)
-        if not isinstance(self, State):
-            self.redraw()
+        self.redraw(_warn=False)
         return quadratic_curve_to
 
     def arc(
@@ -195,8 +189,7 @@ class DrawingActionDispatch:
         """
         arc = Arc(x, y, radius, startangle, endangle, counterclockwise, anticlockwise)
         self._action_target.append(arc)
-        if not isinstance(self, State):
-            self.redraw()
+        self.redraw(_warn=False)
         return arc
 
     def ellipse(
@@ -244,8 +237,7 @@ class DrawingActionDispatch:
             anticlockwise,
         )
         self._action_target.append(ellipse)
-        if not isinstance(self, State):
-            self.redraw()
+        self.redraw(_warn=False)
         return ellipse
 
     def rect(self, x: float, y: float, width: float, height: float) -> Rect:
@@ -261,7 +253,7 @@ class DrawingActionDispatch:
         rect = Rect(x, y, width, height)
         self._action_target.append(rect)
         if not isinstance(self, State):
-            self.redraw()
+            self.redraw(_warn=False)
         return rect
 
     def fill(
@@ -286,8 +278,7 @@ class DrawingActionDispatch:
         """
         fill = Fill(color, fill_rule, x, y)
         self._action_target.append(fill)
-        if not isinstance(self, State):
-            self.redraw()
+        self.redraw(_warn=False)
         return fill
 
     def stroke(
@@ -309,8 +300,7 @@ class DrawingActionDispatch:
         """
         stroke = Stroke(color, line_width, line_dash, x, y)
         self._action_target.append(stroke)
-        if not isinstance(self, State):
-            self.redraw()
+        self.redraw(_warn=False)
         return stroke
 
     ###########################################################################
@@ -344,8 +334,7 @@ class DrawingActionDispatch:
         """
         write_text = WriteText(text, x, y, font, baseline, line_height)
         self._action_target.append(write_text)
-        if not isinstance(self, State):
-            self.redraw()
+        self.redraw(_warn=False)
         return write_text
 
     ###########################################################################
@@ -387,8 +376,7 @@ class DrawingActionDispatch:
         """
         draw_image = DrawImage(image, x, y, width, height)
         self._action_target.append(draw_image)
-        if not isinstance(self, State):
-            self.redraw()
+        self.redraw(_warn=False)
         return draw_image
 
     ###########################################################################
@@ -403,8 +391,7 @@ class DrawingActionDispatch:
         """
         rotate = Rotate(radians)
         self._action_target.append(rotate)
-        if not isinstance(self, State):
-            self.redraw()
+        self.redraw(_warn=False)
         return rotate
 
     def scale(self, sx: float, sy: float) -> Scale:
@@ -419,8 +406,7 @@ class DrawingActionDispatch:
         """
         scale = Scale(sx, sy)
         self._action_target.append(scale)
-        if not isinstance(self, State):
-            self.redraw()
+        self.redraw(_warn=False)
         return scale
 
     def translate(self, tx: float, ty: float) -> Translate:
@@ -433,8 +419,7 @@ class DrawingActionDispatch:
         """
         translate = Translate(tx, ty)
         self._action_target.append(translate)
-        if not isinstance(self, State):
-            self.redraw()
+        self.redraw(_warn=False)
         return translate
 
     def reset_transform(self) -> ResetTransform:
@@ -445,8 +430,7 @@ class DrawingActionDispatch:
         """
         reset_transform = ResetTransform()
         self._action_target.append(reset_transform)
-        if not isinstance(self, State):
-            self.redraw()
+        self.redraw(_warn=False)
         return reset_transform
 
     ###########################################################################
@@ -461,15 +445,82 @@ class DrawingActionDispatch:
         """
         state = State()
         self._action_target.append(state)
+        self.redraw(_warn=False)
         return state
+
+    ######################################################################
+    # 2026-01: Backwards compatibility for <= 0.5.3
+    ######################################################################
 
     def Context(self) -> ContextManager[State]:
         warnings.warn(
-            "State.Context() has been renamed to State.state()",
+            "The Context() drawing emthod has been renamed to state()",
             DeprecationWarning,
             stacklevel=2,
         )
         return self.state()
+
+    def ClosedPath(
+        self,
+        x: float | None = None,
+        y: float | None = None,
+    ) -> ContextManager(ClosePath):
+        warnings.warn(
+            (
+                "The ClosedPath() drawing method has been renamed to close_path(). Its "
+                "parameters (x and y) are also now keyword-only."
+            ),
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self.close_path(x=x, y=y)
+
+    def Fill(
+        self,
+        x: float | None = None,
+        y: float | None = None,
+        color: ColorT | None = None,
+        fill_rule: FillRule = FillRule.NONZERO,
+    ) -> ContextManager[Fill]:
+        warnings.warn(
+            (
+                "The Fill() drawing method has been renamed to close_fill(). It now "
+                "accepts fill_rule as its only positional parameter; color, x, and y "
+                "are now keyword-only."
+            ),
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self.close_path(fill_rule=fill_rule, color=color, x=x, y=y)
+
+    def Stroke(
+        self,
+        x: float | None = None,
+        y: float | None = None,
+        color: ColorT | None = None,
+        line_width: float | None = None,
+        line_dash: list[float] | None = None,
+    ) -> ContextManager[Stroke]:
+        warnings.warn(
+            (
+                "The Stroke() drawing method has been renamed to stroke(). Its "
+                "parameters (color, line_width, line_dash, x, and y) are also now "
+                "keyword-only."
+            ),
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self.close_path(
+            color=color,
+            line_width=line_width,
+            line_dash=line_dash,
+            x=x,
+            y=y,
+        )
+
+    ######################################################################
+    # End Backwards compatibility
+    ######################################################################
 
 
 class State(DrawingAction, DrawingActionDispatch):
@@ -504,30 +555,40 @@ class State(DrawingAction, DrawingActionDispatch):
         # Don't suppress any exceptions
         return False
 
-    ###########################################################################
-    # Methods to keep track of the canvas, automatically redraw it
-    ###########################################################################
+    ######################################################################
+    # 2026-1: Backwards compatibility for Toga <= 0.5.3
+    ######################################################################
 
     @property
-    def canvas(self) -> None:
-        """The canvas that is associated with this drawing state."""
-        # Deprecation warning
-        # This will get the first that matches.
+    def canvas(self) -> Canvas:
+        warnings.warn(
+            "State objects no longer hold a reference to their canvas.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+
         from .canvas import Canvas
 
+        # Get the first that matches.
         for ref in Canvas._instances:
             if canvas := ref():
                 if self is canvas.root_state or self in canvas.root_state:
                     return canvas
 
-    ######################################################################
-    # 2026-1: Backwards compatibility for Toga <= 0.5.3
-    ######################################################################
+    def redraw(self, _warn=True) -> None:
+        if _warn:
+            warnings.warn(
+                (
+                    "State.redraw() is deprecated. Call the canvas's redraw() method "
+                    "instead."
+                ),
+                DeprecationWarning,
+                stacklevel=2,
+            )
 
-    def redraw(self) -> None:
-        """Calls [`Canvas.redraw`][toga.Canvas.redraw] on the parent Canvas."""
         from .canvas import Canvas
 
+        # Redraw any canvases that contain self; could be multiple.
         for ref in Canvas._instances:
             if canvas := ref():
                 if self is canvas.root_state or self in canvas.root_state:
@@ -576,61 +637,13 @@ class State(DrawingAction, DrawingActionDispatch):
         self.drawing_actions.clear()
 
 
-def _process_args(name: str, names: list[str], arg_values: list, **kwargs):
-    if len(arg_values) > len(names):
-        raise TypeError(
-            f"{name}.__init__ takes {len(names)} positional arguments (in its "
-            f"deprecated signature) but {len(arg_values)} were given"
-        )
-
-    args = dict(zip_longest(names, arg_values))
-    final_kwargs = {}
-
-    for name in names:
-        arg = args[name]
-        kwarg = kwargs[name]
-        if arg is not None and kwarg is not None:
-            raise TypeError(f"{name}.__init__ got multiple values for argument {name}")
-        final_kwargs[name] = arg if arg is not None else kwarg
-
-    # Preserve fill_rule, even though it won't be in final_kwargs.
-    return kwargs | final_kwargs
-
-
 @dataclass(repr=False)
 class ClosePath(State):
     x: float | None = field(default=None, kw_only=True)
     y: float | None = field(default=None, kw_only=True)
 
-    def __init__(
-        self,
-        *_args,
-        x: float | None = None,
-        y: float | None = None,
-    ):
-        if _args:
-            warnings.warn(
-                (
-                    "ClosedPath.__init__ now takes no positional arguments; both x and "
-                    "y, if provided, must be keyword arguments."
-                ),
-                DeprecationWarning,
-                stacklevel=2,
-            )
-
-            kwargs = _process_args(
-                "ClosedPath",
-                ["x", "y"],
-                _args,
-                x=x,
-                y=y,
-            )
-            self.__init__(**kwargs)
-
-        else:
-            super().__init__()
-            self.x = x
-            self.y = y
+    def __post_init__(self):
+        super().__init__()
 
     def _draw(self, context: Any) -> None:
         if not hasattr(self, "_is_open"):
@@ -652,94 +665,13 @@ class ClosePath(State):
 
 @dataclass(repr=False)
 class Fill(State):
+    color: ColorT | None = color_property()
     fill_rule: FillRule = FillRule.NONZERO
-    color: ColorT | None = color_property()  # TODO: kw_only field once validation
-    x: float | None = field(default=None, kw_only=True)
-    y: float | None = field(default=None, kw_only=True)
+    x: float | None = None
+    y: float | None = None
 
-    def __init__(
-        self,
-        fill_rule: FillRule = FillRule.NONZERO,
-        *_args,
-        color: ColorT | None = None,
-        x: float | None = None,
-        y: float | None = None,
-    ):
-        warning = (
-            "Fill.__init__ now takes fill_rule as its only positional argument; color, "
-            "x, and y, if provided, must be keyword arguments."
-        )
-
-        print("Called")
-        if _args:
-            print(f"Initial args: {_args}")
-            warnings.warn(warning, DeprecationWarning, stacklevel=2)
-
-            if len(_args) > 3:
-                raise TypeError  # too many
-
-            match fill_rule:
-                case int() | float():
-                    x_arg = fill_rule
-                    if not _args:
-                        self.__init__(x=x_arg)
-
-                    # Old parameter order for state (x, y, color, fill_rule)
-                    names = ["x", "y", "color"]
-                    _args = [x_arg, *_args]
-                    if len(_args) == 4:
-                        fill_rule = _args.pop()
-                    else:
-                        fill_rule = None
-                case Color() | str():
-                    color_arg = fill_rule
-
-                    # Old parameter order for non-state version (color, fill_rule)
-                    # (Add x and y)
-                    names = ["color", "x", "y"]
-                    fill_rule, *rest = _args
-                    print(f"{fill_rule = }")
-                    _args = [color_arg, *rest]
-                case _:
-                    # Default to current order (fill_rule, color, x, y) (the only
-                    # problem is supplying extra positional arguments)... probably.
-                    # None is ambiguous.
-                    names = ["color", "x", "y"]
-
-            kwargs = _process_args(
-                "Fill",
-                names,
-                _args,
-                fill_rule=FillRule.NONZERO if fill_rule is None else fill_rule,
-                color=color,
-                x=x,
-                y=y,
-            )
-            print(f"Ready to call with: {kwargs}")
-            self.__init__(**kwargs)
-
-        # Even if we haven't received any positional arguments, try to interpret what
-        # the first argument is intended to mean.
-
-        elif isinstance(fill_rule, float | int):
-            warnings.warn(warning, DeprecationWarning, stacklevel=2)
-            if x is not None:
-                raise TypeError
-            self.__init__(color=color, x=fill_rule, y=y)
-
-        elif isinstance(fill_rule, Color | str):
-            warnings.warn(warning, DeprecationWarning, stacklevel=2)
-            if color is not None:
-                raise TypeError
-            self.__init__(color=fill_rule, x=x, y=y)
-
-        else:
-            print("Reached the else")
-            super().__init__()
-            self.fill_rule = fill_rule
-            self.color = color
-            self.x = x
-            self.y = y
+    def __post_init__(self):
+        super().__init__()
 
     def _draw(self, context: Any) -> None:
         if not hasattr(self, "_is_open"):
@@ -769,62 +701,16 @@ class Fill(State):
         context.restore()
 
 
-@dataclass(repr=False, init=False)
+@dataclass(repr=False)
 class Stroke(State):
-    color: ColorT | None = color_property()  # TODO: kw_only field once validation
-    line_width: float | None = field(default=None, kw_only=True)
-    line_dash: list[float] | None = field(default=None, kw_only=True)
-    x: float | None = field(default=None, kw_only=True)
-    y: float | None = field(default=None, kw_only=True)
+    color: ColorT | None = color_property()
+    line_width: float | None = None
+    line_dash: list[float] | None = None
+    x: float | None = None
+    y: float | None = None
 
-    def __init__(
-        self,
-        *_args,
-        color: ColorT | None = None,
-        line_width: float | None = None,
-        line_dash: list[float] | None = None,
-        x: float | None = None,
-        y: float | None = None,
-    ):
-        if _args:
-            warnings.warn(
-                (
-                    "Stroke.__init__ now takes no positional arguments; color, "
-                    "line_width, line_dash, x, and y, if provided, must be keyword "
-                    "arguments."
-                ),
-                DeprecationWarning,
-                stacklevel=2,
-            )
-
-            match _args[0]:
-                case int() | float():
-                    # Old parameter order for state
-                    names = ["x", "y", "color", "line_width", "line_dash"]
-                case _:
-                    # Default to current order
-                    names = ["color", "line_width", "line_dash", "x", "y"]
-
-            kwargs = _process_args(
-                "Stroke",
-                names,
-                _args,
-                color=color,
-                line_width=line_width,
-                line_dash=line_dash,
-                x=x,
-                y=y,
-            )
-
-            self.__init__(**kwargs)
-
-        else:
-            super().__init__()
-            self.color = color
-            self.line_width = line_width
-            self.line_dash = line_dash
-            self.x = x
-            self.y = y
+    def __post_init__(self):
+        super().__init__()
 
     def _draw(self, context: Any) -> None:
         if not hasattr(self, "_is_open"):
@@ -859,3 +745,53 @@ class Stroke(State):
 
         context.in_stroke = False  # Backwards compatibility for Toga <= 0.5.3
         context.restore()
+
+
+######################################################################
+# 2026-1: Backwards compatibility for Toga <= 0.5.3
+######################################################################
+
+
+class ClosedPathContext(ClosePath):
+    def __init__(self, x: float | None = None, y: float | None = None):
+        warnings.warn(
+            "ClosedPathContext has been renamed to ClosePath.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        super().__init__(x=x, y=y)
+
+
+class FillContext(Fill):
+    def __init__(
+        self,
+        x: float | None = None,
+        y: float | None = None,
+        color: ColorT | None = None,
+        fill_rule: FillRule = FillRule.NONZERO,
+    ):
+        warnings.warn(
+            "FillContext has been renamed to Fill",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        super().__init__(color=color, fill_rule=fill_rule, x=x, y=y)
+
+
+class StrokeContext(Stroke):
+    def __init__(
+        self,
+        x: float | None = None,
+        y: float | None = None,
+        color: ColorT | None = None,
+        line_width: float | None = None,
+        line_dash: list[float] | None = None,
+    ):
+        warnings.warn(
+            "StrokeContext has been renamed to Stroke.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        super().__init__(
+            color=color, line_width=line_width, line_dash=line_dash, x=x, y=y
+        )

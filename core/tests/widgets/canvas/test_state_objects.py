@@ -1,3 +1,5 @@
+from contextlib import nullcontext
+
 import pytest
 
 from toga.colors import REBECCAPURPLE, rgb
@@ -6,6 +8,7 @@ from toga.widgets.canvas import (
     ClosePath,
     Fill,
     LineTo,
+    Scale,
     State,
     Stroke,
 )
@@ -566,3 +569,214 @@ def test_order_change(widget):
         ("line to", {"x": 99, "y": 99}),
         "restore",
     ]
+
+
+def test_contains(widget):
+    """Whether a drawing action is in a state can be tested."""
+    with widget.Stroke() as stroke:
+        reset_transform = stroke.reset_transform()
+        with stroke.Fill() as fill:
+            line_to = fill.line_to(0, 0)
+        close_path = stroke.close_path()
+
+    scale = Scale(1, 1)
+
+    for action in [stroke, reset_transform, fill, line_to, close_path]:
+        assert action in widget.root_state
+
+    assert close_path not in fill
+    assert scale not in widget.root_state
+
+
+@pytest.mark.parametrize(
+    "StateClass, args, kwargs, fail, attrs",
+    [
+        ###########
+        # ClosePath
+        ###########
+        (
+            ClosePath,
+            (5, 10),
+            {},
+            False,
+            {"x": 5, "y": 10},
+        ),
+        (
+            ClosePath,
+            (5,),
+            {"y": 10},
+            False,
+            {"x": 5, "y": 10},
+        ),
+        (
+            ClosePath,
+            (5,),
+            {"x": 5},
+            True,
+            None,
+        ),
+        (
+            ClosePath,
+            (5,),
+            {"x": 5, "y": 10},
+            True,
+            None,
+        ),
+        ######
+        # Fill
+        ######
+        (
+            Fill,
+            (5, 10),
+            {},
+            False,
+            {"fill_rule": FillRule.NONZERO, "color": None, "x": 5, "y": 10},
+        ),
+        (
+            Fill,
+            (5,),
+            {},
+            False,
+            {"fill_rule": FillRule.NONZERO, "color": None, "x": 5, "y": None},
+        ),
+        (
+            Fill,
+            (REBECCAPURPLE,),
+            {},
+            False,
+            {
+                "fill_rule": FillRule.NONZERO,
+                "color": REBECCA_PURPLE_COLOR,
+                "x": None,
+                "y": None,
+            },
+        ),
+        (
+            Fill,
+            (REBECCAPURPLE, FillRule.EVENODD, 5, 10),
+            {},
+            False,
+            {
+                "fill_rule": FillRule.EVENODD,
+                "color": REBECCA_PURPLE_COLOR,
+                "x": 5,
+                "y": 10,
+            },
+        ),
+        # Unfortunately there's not a graceful way to handle something like
+        # Fill(REBECCAPURPLE, fill_rule=FillRule.EVENODD), without renaming the *actual*
+        # fill_rule parameter, since Python throws a TypeError from the repeated
+        # argument before even getting to our code.
+        ########
+        # Stroke
+        ########
+        (
+            Stroke,
+            (5, 10),
+            {},
+            False,
+            {"color": None, "line_width": None, "line_dash": None, "x": 5, "y": 10},
+        ),
+        (
+            Stroke,
+            (5,),
+            {},
+            False,
+            {"color": None, "line_width": None, "line_dash": None, "x": 5, "y": None},
+        ),
+        (
+            Stroke,
+            (REBECCAPURPLE,),
+            {},
+            False,
+            {
+                "color": REBECCA_PURPLE_COLOR,
+                "line_width": None,
+                "line_dash": None,
+                "x": None,
+                "y": None,
+            },
+        ),
+        (
+            Stroke,
+            (REBECCA_PURPLE_COLOR,),
+            {},
+            False,
+            {
+                "color": REBECCA_PURPLE_COLOR,
+                "line_width": None,
+                "line_dash": None,
+                "x": None,
+                "y": None,
+            },
+        ),
+        (
+            Stroke,
+            (
+                5,
+                10,
+                REBECCAPURPLE,
+            ),
+            {},
+            False,
+            {
+                "color": REBECCA_PURPLE_COLOR,
+                "line_width": None,
+                "line_dash": None,
+                "x": 5,
+                "y": 10,
+            },
+        ),
+        (
+            Stroke,
+            (REBECCAPURPLE, 2, [1, 2]),
+            {},
+            False,
+            {
+                "color": REBECCA_PURPLE_COLOR,
+                "line_width": 2,
+                "line_dash": [1, 2],
+                "x": None,
+                "y": None,
+            },
+        ),
+        (
+            Stroke,
+            (REBECCAPURPLE, 2, [1, 2], 5, 10),
+            {},
+            False,
+            {
+                "color": REBECCA_PURPLE_COLOR,
+                "line_width": 2,
+                "line_dash": [1, 2],
+                "x": 5,
+                "y": 10,
+            },
+        ),
+        (
+            Stroke,
+            (
+                5,
+                5,
+                REBECCAPURPLE,
+            ),
+            {"x": 10},
+            True,
+            None,
+        ),
+    ],
+)
+def test_deprecated_signatures(StateClass, args, kwargs, fail, attrs):
+    """State subclasses correctly interpret and warn on deprecated usage."""
+    if fail:
+        context = pytest.raises(TypeError)
+    else:
+        context = nullcontext()
+
+    with pytest.warns(DeprecationWarning):
+        with context:
+            state = StateClass(*args, **kwargs)
+
+    if not fail:
+        for name, value in attrs.items():
+            assert getattr(state, name) == value

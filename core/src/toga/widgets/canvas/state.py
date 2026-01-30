@@ -2,10 +2,12 @@ from __future__ import annotations
 
 import warnings
 from contextlib import AbstractContextManager as ContextManager
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from itertools import zip_longest
 from math import pi
 from typing import TYPE_CHECKING, Any
 
+from toga.colors import Color
 from toga.constants import Baseline, FillRule
 from toga.fonts import Font
 from toga.images import Image
@@ -470,111 +472,6 @@ class DrawingActionDispatch:
         return self.state()
 
 
-# @contextmanager
-# def ClosedPath(
-#     self,
-#     x: float | None = None,
-#     y: float | None = None,
-# ) -> Iterator[ClosedPathContext]:
-#     """Construct and yield a new `ClosedPath`
-#     sub-state that will draw a closed path, starting from an origin.
-
-#     This is a context manager; it creates a new path and moves to the start
-#     coordinate; when the state exits, the path is closed. For fine-grained control
-#     of a path, you can use [`begin_path`][toga.widgets.canvas.State.begin_path]
-#     and [`close_path`][toga.widgets.canvas.State.close_path].
-
-#     :param x: The x coordinate of the path's starting point.
-#     :param y: The y coordinate of the path's starting point.
-#     :return: Yields the [`ClosedPathContext`][toga.widgets.canvas.ClosedPathContext]
-#         state object.
-#     """
-#     closed_path = ClosedPathContext(x=x, y=y)
-#     self._action_target.append(closed_path)
-#     yield closed_path
-
-# @contextmanager
-# def Fill(
-#     self,
-#     x: float | None = None,
-#     y: float | None = None,
-#     color: ColorT | None = None,
-#     fill_rule: FillRule = FillRule.NONZERO,
-# ) -> Iterator[FillContext]:
-#     """Construct and yield a new `Fill` sub-state
-#     within this state.
-
-#     This is a context manager; it creates a new path, and moves to the start
-#     coordinate; when the state exits, the path is closed with a fill. For
-#     fine-grained control of a path, you can use
-#     [`begin_path`][toga.widgets.canvas.State.begin_path],
-#     [`move_to`][toga.widgets.canvas.State.move_to],
-#     [`close_path`][toga.widgets.canvas.State.close_path] and
-#     [`fill`][toga.widgets.canvas.State.fill].
-
-#     If both an x and y coordinate is provided, the drawing state will begin with
-#     a `move_to` operation in that state.
-
-#     :param x: The x coordinate of the path's starting point.
-#     :param y: The y coordinate of the path's starting point.
-#     :param fill_rule: `nonzero` is the non-zero winding rule; `evenodd` is the
-#         even-odd winding rule.
-#     :param color: The fill color.
-#     :return: Yields the new [`FilContext`][toga.widgets.canvas.FillContext] state
-#         object.
-#     """
-#     fill = FillContext(
-#         x=x,
-#         y=y,
-#         color=color,
-#         fill_rule=fill_rule,
-#     )
-#     self._action_target.append(fill)
-#     yield fill
-
-# @contextmanager
-# def Stroke(
-#     self,
-#     x: float | None = None,
-#     y: float | None = None,
-#     color: ColorT | None = None,
-#     line_width: float | None = None,
-#     line_dash: list[float] | None = None,
-# ) -> Iterator[StrokeContext]:
-#     """Construct and yield a new `Stroke` sub-state
-#     within this state.
-
-#     This is a context manager; it creates a new path, and moves to the start
-#     coordinate; when the state exits, the path is closed with a stroke. For
-#     fine-grained control of a path, you can use
-#     [`begin_path`][toga.widgets.canvas.State.begin_path],
-#     [`move_to`][toga.widgets.canvas.State.move_to],
-#     [`close_path`][toga.widgets.canvas.State.close_path] and
-#     [`stroke`][toga.widgets.canvas.State.stroke].
-
-#     If both an x and y coordinate is provided, the drawing state will begin with
-#     a `move_to` operation in that state.
-
-#     :param x: The x coordinate of the path's starting point.
-#     :param y: The y coordinate of the path's starting point.
-#     :param color: The color for the stroke.
-#     :param line_width: The width of the stroke.
-#     :param line_dash: The dash pattern to follow when drawing the line. Default is a
-#         solid line.
-#     :return: Yields the new [`StrokeContext`][toga.widgets.canvas.StrokeContext]
-#         state object.
-#     """
-#     stroke = StrokeContext(
-#         x=x,
-#         y=y,
-#         color=color,
-#         line_width=line_width,
-#         line_dash=line_dash,
-#     )
-#     self._action_target.append(stroke)
-#     yield stroke
-
-
 class State(DrawingAction, DrawingActionDispatch):
     """A drawing state for a canvas.
 
@@ -614,11 +511,31 @@ class State(DrawingAction, DrawingActionDispatch):
     @property
     def canvas(self) -> None:
         """The canvas that is associated with this drawing state."""
-        raise RuntimeError("States no longer hold a reference to their canvas.")
+        # Deprecation warning
+        # This will get the first that matches.
+        from .canvas import Canvas
+
+        for ref in Canvas._instances:
+            if canvas := ref():
+                if self is canvas.root_state or self in canvas.root_state:
+                    return canvas
+
+    ######################################################################
+    # 2026-1: Backwards compatibility for Toga <= 0.5.3
+    ######################################################################
 
     def redraw(self) -> None:
         """Calls [`Canvas.redraw`][toga.Canvas.redraw] on the parent Canvas."""
-        raise RuntimeError("States no longer hold a reference to their canvas.")
+        from .canvas import Canvas
+
+        for ref in Canvas._instances:
+            if canvas := ref():
+                if self is canvas.root_state or self in canvas.root_state:
+                    canvas.redraw()
+
+    ######################################################################
+    # End backwards compatibility
+    ######################################################################
 
     ###########################################################################
     # Operations on drawing objects
@@ -659,13 +576,61 @@ class State(DrawingAction, DrawingActionDispatch):
         self.drawing_actions.clear()
 
 
+def _process_args(name: str, names: list[str], arg_values: list, **kwargs):
+    if len(arg_values) > len(names):
+        raise TypeError(
+            f"{name}.__init__ takes {len(names)} positional arguments (in its "
+            f"deprecated signature) but {len(arg_values)} were given"
+        )
+
+    args = dict(zip_longest(names, arg_values))
+    final_kwargs = {}
+
+    for name in names:
+        arg = args[name]
+        kwarg = kwargs[name]
+        if arg is not None and kwarg is not None:
+            raise TypeError(f"{name}.__init__ got multiple values for argument {name}")
+        final_kwargs[name] = arg if arg is not None else kwarg
+
+    # Preserve fill_rule, even though it won't be in final_kwargs.
+    return kwargs | final_kwargs
+
+
 @dataclass(repr=False)
 class ClosePath(State):
-    x: float | None = None
-    y: float | None = None
+    x: float | None = field(default=None, kw_only=True)
+    y: float | None = field(default=None, kw_only=True)
 
-    def __post_init__(self):
-        super().__init__()
+    def __init__(
+        self,
+        *_args,
+        x: float | None = None,
+        y: float | None = None,
+    ):
+        if _args:
+            warnings.warn(
+                (
+                    "ClosedPath.__init__ now takes no positional arguments; both x and "
+                    "y, if provided, must be keyword arguments."
+                ),
+                DeprecationWarning,
+                stacklevel=2,
+            )
+
+            kwargs = _process_args(
+                "ClosedPath",
+                ["x", "y"],
+                _args,
+                x=x,
+                y=y,
+            )
+            self.__init__(**kwargs)
+
+        else:
+            super().__init__()
+            self.x = x
+            self.y = y
 
     def _draw(self, context: Any) -> None:
         if not hasattr(self, "_is_open"):
@@ -687,13 +652,94 @@ class ClosePath(State):
 
 @dataclass(repr=False)
 class Fill(State):
-    color: ColorT | None = color_property()
     fill_rule: FillRule = FillRule.NONZERO
-    x: float | None = None
-    y: float | None = None
+    color: ColorT | None = color_property()  # TODO: kw_only field once validation
+    x: float | None = field(default=None, kw_only=True)
+    y: float | None = field(default=None, kw_only=True)
 
-    def __post_init__(self):
-        super().__init__()
+    def __init__(
+        self,
+        fill_rule: FillRule = FillRule.NONZERO,
+        *_args,
+        color: ColorT | None = None,
+        x: float | None = None,
+        y: float | None = None,
+    ):
+        warning = (
+            "Fill.__init__ now takes fill_rule as its only positional argument; color, "
+            "x, and y, if provided, must be keyword arguments."
+        )
+
+        print("Called")
+        if _args:
+            print(f"Initial args: {_args}")
+            warnings.warn(warning, DeprecationWarning, stacklevel=2)
+
+            if len(_args) > 3:
+                raise TypeError  # too many
+
+            match fill_rule:
+                case int() | float():
+                    x_arg = fill_rule
+                    if not _args:
+                        self.__init__(x=x_arg)
+
+                    # Old parameter order for state (x, y, color, fill_rule)
+                    names = ["x", "y", "color"]
+                    _args = [x_arg, *_args]
+                    if len(_args) == 4:
+                        fill_rule = _args.pop()
+                    else:
+                        fill_rule = None
+                case Color() | str():
+                    color_arg = fill_rule
+
+                    # Old parameter order for non-state version (color, fill_rule)
+                    # (Add x and y)
+                    names = ["color", "x", "y"]
+                    fill_rule, *rest = _args
+                    print(f"{fill_rule = }")
+                    _args = [color_arg, *rest]
+                case _:
+                    # Default to current order (fill_rule, color, x, y) (the only
+                    # problem is supplying extra positional arguments)... probably.
+                    # None is ambiguous.
+                    names = ["color", "x", "y"]
+
+            kwargs = _process_args(
+                "Fill",
+                names,
+                _args,
+                fill_rule=FillRule.NONZERO if fill_rule is None else fill_rule,
+                color=color,
+                x=x,
+                y=y,
+            )
+            print(f"Ready to call with: {kwargs}")
+            self.__init__(**kwargs)
+
+        # Even if we haven't received any positional arguments, try to interpret what
+        # the first argument is intended to mean.
+
+        elif isinstance(fill_rule, float | int):
+            warnings.warn(warning, DeprecationWarning, stacklevel=2)
+            if x is not None:
+                raise TypeError
+            self.__init__(color=color, x=fill_rule, y=y)
+
+        elif isinstance(fill_rule, Color | str):
+            warnings.warn(warning, DeprecationWarning, stacklevel=2)
+            if color is not None:
+                raise TypeError
+            self.__init__(color=fill_rule, x=x, y=y)
+
+        else:
+            print("Reached the else")
+            super().__init__()
+            self.fill_rule = fill_rule
+            self.color = color
+            self.x = x
+            self.y = y
 
     def _draw(self, context: Any) -> None:
         if not hasattr(self, "_is_open"):
@@ -723,16 +769,62 @@ class Fill(State):
         context.restore()
 
 
-@dataclass(repr=False)
+@dataclass(repr=False, init=False)
 class Stroke(State):
-    color: ColorT | None = color_property()
-    line_width: float | None = None
-    line_dash: list[float] | None = None
-    x: float | None = None
-    y: float | None = None
+    color: ColorT | None = color_property()  # TODO: kw_only field once validation
+    line_width: float | None = field(default=None, kw_only=True)
+    line_dash: list[float] | None = field(default=None, kw_only=True)
+    x: float | None = field(default=None, kw_only=True)
+    y: float | None = field(default=None, kw_only=True)
 
-    def __post_init__(self):
-        super().__init__()
+    def __init__(
+        self,
+        *_args,
+        color: ColorT | None = None,
+        line_width: float | None = None,
+        line_dash: list[float] | None = None,
+        x: float | None = None,
+        y: float | None = None,
+    ):
+        if _args:
+            warnings.warn(
+                (
+                    "Stroke.__init__ now takes no positional arguments; color, "
+                    "line_width, line_dash, x, and y, if provided, must be keyword "
+                    "arguments."
+                ),
+                DeprecationWarning,
+                stacklevel=2,
+            )
+
+            match _args[0]:
+                case int() | float():
+                    # Old parameter order for state
+                    names = ["x", "y", "color", "line_width", "line_dash"]
+                case _:
+                    # Default to current order
+                    names = ["color", "line_width", "line_dash", "x", "y"]
+
+            kwargs = _process_args(
+                "Stroke",
+                names,
+                _args,
+                color=color,
+                line_width=line_width,
+                line_dash=line_dash,
+                x=x,
+                y=y,
+            )
+
+            self.__init__(**kwargs)
+
+        else:
+            super().__init__()
+            self.color = color
+            self.line_width = line_width
+            self.line_dash = line_dash
+            self.x = x
+            self.y = y
 
     def _draw(self, context: Any) -> None:
         if not hasattr(self, "_is_open"):

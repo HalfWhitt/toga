@@ -783,18 +783,20 @@ async def test_multiline_text(canvas, probe):
 
     # Vertical guidelines
     X = [10, 75, 140]
-    with canvas.stroke(color=RED) as guideline:
+    with canvas.stroke(color=RED):
         for x in X:
-            guideline.move_to(x, 0)
-            guideline.line_to(x, canvas.style.height)
+            canvas.move_to(x, 0)
+            canvas.line_to(x, canvas.style.height)
 
     def caption(baseline):
         return f"{baseline.name.capitalize()}\nTwo\nThree"
 
     # ALPHABETIC baseline
     y = 30
-    guideline.move_to(0, y)
-    guideline.line_to(canvas.style.width, y)
+    with canvas.stroke(color=RED):
+        canvas.move_to(0, y)
+        canvas.line_to(canvas.style.width, y)
+
     with canvas.fill():
         # Default baseline (ALPHABETIC), with default font and various sizes.
         x = X[0]
@@ -817,8 +819,9 @@ async def test_multiline_text(canvas, probe):
 
     # Other baselines, with default font but specified size
     y = 130
-    guideline.move_to(0, y)
-    guideline.line_to(canvas.style.width, y)
+    with canvas.stroke(color=RED):
+        canvas.move_to(0, y)
+        canvas.line_to(canvas.style.width, y)
     font = Font(SYSTEM, 12)
 
     for i, baseline in enumerate([Baseline.BOTTOM, Baseline.MIDDLE, Baseline.TOP]):

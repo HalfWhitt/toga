@@ -703,6 +703,24 @@ class State(DrawingAction, DrawingActionDispatch):
 
 @dataclass(repr=False)
 class ClosePath(State):
+    """A drawing state that will build a closed path, starting from an
+    origin.
+
+    This is a context manager; it creates a new path and moves to the start coordinate;
+    when the state exits, the path is closed. For fine-grained control of a path, you
+    can use [`begin_path`][toga.widgets.canvas.State.begin_path],
+    [`move_to`][toga.widgets.canvas.State.move_to] and,
+    [`close_path`][toga.widgets.canvas.State.close_path].
+
+    If both an x and y coordinate is provided, the drawing state will begin with
+    a `move_to` operation in that state.
+
+    You should not create a [`ClosedPathContext`][toga.widgets.canvas.ClosedPathContext]
+    state directly; instead, you should use the
+    [`ClosedPath()`][toga.widgets.canvas.State.ClosedPath] method on an existing
+    state.
+    """
+
     x: float | None = field(default=None, kw_only=True)
     y: float | None = field(default=None, kw_only=True)
 
@@ -729,6 +747,28 @@ class ClosePath(State):
 
 @dataclass(repr=False)
 class Fill(State):
+    """A drawing state that will apply a fill to any paths all objects in the
+    state.
+
+    The fill can use either the [Non-Zero](https://en.wikipedia.org/wiki/Nonzero-rule)
+    or [Even-Odd](https://en.wikipedia.org/wiki/Even-odd_rule) winding rule for
+    filling paths.
+
+    This is a context manager; it creates a new path, and moves to the start coordinate;
+    when the state exits, the path is closed with a fill. For fine-grained control of
+    a path, you can use [`begin_path`][toga.widgets.canvas.State.begin_path],
+    [`move_to`][toga.widgets.canvas.State.move_to],
+    [`close_path`][toga.widgets.canvas.State.close_path] and
+    [`fill`][toga.widgets.canvas.State.fill].
+
+    If both an x and y coordinate is provided, the drawing state will begin with
+    a `move_to` operation in that state.
+
+    You should not create a [`FillContext`][toga.widgets.canvas.FillContext] state
+    directly; instead, you should use the [`Fill()`][toga.widgets.canvas.State.Fill]
+    method on an existing state.
+    """
+
     color: ColorT | None = color_property()
     fill_rule: FillRule = FillRule.NONZERO
     x: float | None = None
@@ -767,6 +807,24 @@ class Fill(State):
 
 @dataclass(repr=False)
 class Stroke(State):
+    """Construct a drawing state that will draw a stroke on all paths defined
+    within the state.
+
+    This is a context manager; it creates a new path, and moves to the start coordinate;
+    when the state exits, the path is drawn with the stroke. For fine-grained control
+    of a path, you can use [`begin_path`][toga.widgets.canvas.State.begin_path],
+    [`move_to`][toga.widgets.canvas.State.move_to],
+    [`close_path`][toga.widgets.canvas.State.close_path] and
+    [`stroke`][toga.widgets.canvas.State.stroke].
+
+    If both an x and y coordinate is provided, the drawing state will begin with
+    a `move_to` operation in that state.
+
+    You should not create a [`StrokeContext`][toga.widgets.canvas.StrokeContext] state
+    directly; instead, you should use the
+    [`Stroke()`][toga.widgets.canvas.State.Stroke] method on an existing state.
+    """
+
     color: ColorT | None = color_property()
     line_width: float | None = None
     line_dash: list[float] | None = None

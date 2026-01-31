@@ -45,6 +45,17 @@ class DrawingActionDispatch:
         """The State that should receive the drawing actions."""
         raise NotImplementedError()
 
+    def _warn_if_state(self):
+        if isinstance(self, State):
+            warnings.warn(
+                (
+                    "Calling drawing methods on a State is deprecated. To add actions "
+                    "to the currently active state, call drawing methods on the canvas."
+                ),
+                DeprecationWarning,
+                stacklevel=2,
+            )
+
     ###########################################################################
     # Path manipulation
     ###########################################################################
@@ -55,6 +66,7 @@ class DrawingActionDispatch:
         :returns: The `BeginPath`
             [`DrawingAction`][toga.widgets.canvas.DrawingAction] for the operation.
         """
+        self._warn_if_state()
         begin_path = BeginPath()
         self._action_target.append(begin_path)
         with warnings.catch_warnings():
@@ -73,6 +85,7 @@ class DrawingActionDispatch:
         :returns: The `ClosePath`
             [`DrawingAction`][toga.widgets.canvas.DrawingAction] for the operation.
         """
+        self._warn_if_state()
         close_path = ClosePath(x=x, y=y)
         self._action_target.append(close_path)
         with warnings.catch_warnings():
@@ -88,6 +101,7 @@ class DrawingActionDispatch:
         :returns: The `MoveTo` [`DrawingAction`][toga.widgets.canvas.DrawingAction]
             for the operation.
         """
+        self._warn_if_state()
         move_to = MoveTo(x, y)
         self._action_target.append(move_to)
         with warnings.catch_warnings():
@@ -103,6 +117,7 @@ class DrawingActionDispatch:
         :returns: The `LineTo` [`DrawingAction`][toga.widgets.canvas.DrawingAction]
             for the operation.
         """
+        self._warn_if_state()
         line_to = LineTo(x, y)
         self._action_target.append(line_to)
         with warnings.catch_warnings():
@@ -135,6 +150,7 @@ class DrawingActionDispatch:
         :returns: The `BezierCurveTo`
             [`DrawingAction`][toga.widgets.canvas.DrawingAction] for the operation.
         """
+        self._warn_if_state()
         bezier_curve_to = BezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y)
         self._action_target.append(bezier_curve_to)
         with warnings.catch_warnings():
@@ -165,6 +181,7 @@ class DrawingActionDispatch:
         :returns: The `QuadraticCurveTo`
             [`DrawingAction`][toga.widgets.canvas.DrawingAction] for the operation.
         """
+        self._warn_if_state()
         quadratic_curve_to = QuadraticCurveTo(cpx, cpy, x, y)
         self._action_target.append(quadratic_curve_to)
         with warnings.catch_warnings():
@@ -199,6 +216,7 @@ class DrawingActionDispatch:
         :returns: The `Arc` [`DrawingAction`][toga.widgets.canvas.DrawingAction]
             for the operation.
         """
+        self._warn_if_state()
         arc = Arc(x, y, radius, startangle, endangle, counterclockwise, anticlockwise)
         self._action_target.append(arc)
         with warnings.catch_warnings():
@@ -239,6 +257,7 @@ class DrawingActionDispatch:
         :returns: The `Ellipse` [`DrawingAction`][toga.widgets.canvas.DrawingAction]
             for the operation.
         """
+        self._warn_if_state()
         ellipse = Ellipse(
             x,
             y,
@@ -266,6 +285,7 @@ class DrawingActionDispatch:
         :returns: The `Rect` [`DrawingAction`][toga.widgets.canvas.DrawingAction]
             for the operation.
         """
+        self._warn_if_state()
         rect = Rect(x, y, width, height)
         self._action_target.append(rect)
         with warnings.catch_warnings():
@@ -293,6 +313,7 @@ class DrawingActionDispatch:
         :returns: The `Fill` [`DrawingAction`][toga.widgets.canvas.DrawingAction]
             for the operation.
         """
+        self._warn_if_state()
         fill = Fill(color, fill_rule, x, y)
         self._action_target.append(fill)
         with warnings.catch_warnings():
@@ -317,6 +338,7 @@ class DrawingActionDispatch:
         :returns: The `Stroke` [`DrawingAction`][toga.widgets.canvas.DrawingAction]
             for the operation.
         """
+        self._warn_if_state()
         stroke = Stroke(color, line_width, line_dash, x, y)
         self._action_target.append(stroke)
         with warnings.catch_warnings():
@@ -353,6 +375,8 @@ class DrawingActionDispatch:
         :returns: The `WriteText` [`DrawingAction`][toga.widgets.canvas.DrawingAction]
             for the operation.
         """
+        # Granted, this entire method will soon be deprecated...
+        self._warn_if_state()
         write_text = WriteText(text, x, y, font, baseline, line_height)
         self._action_target.append(write_text)
         with warnings.catch_warnings():
@@ -397,6 +421,7 @@ class DrawingActionDispatch:
             height is omitted, the natural height of the image will be used and
             no scaling will be done.
         """
+        self._warn_if_state()
         draw_image = DrawImage(image, x, y, width, height)
         self._action_target.append(draw_image)
         with warnings.catch_warnings():
@@ -414,6 +439,7 @@ class DrawingActionDispatch:
         :returns: The `Rotate` [`DrawingAction`][toga.widgets.canvas.DrawingAction]
             for the transformation.
         """
+        self._warn_if_state()
         rotate = Rotate(radians)
         self._action_target.append(rotate)
         with warnings.catch_warnings():
@@ -431,6 +457,7 @@ class DrawingActionDispatch:
         :returns: The `Scale` [`DrawingAction`][toga.widgets.canvas.DrawingAction]
             for the transformation.
         """
+        self._warn_if_state()
         scale = Scale(sx, sy)
         self._action_target.append(scale)
         with warnings.catch_warnings():
@@ -446,6 +473,7 @@ class DrawingActionDispatch:
         :returns: The `Translate` [`DrawingAction`][toga.widgets.canvas.DrawingAction]
             for the transformation.
         """
+        self._warn_if_state()
         translate = Translate(tx, ty)
         self._action_target.append(translate)
         with warnings.catch_warnings():
@@ -459,6 +487,7 @@ class DrawingActionDispatch:
         :returns: A `ResetTransform`
             [`DrawingAction`][toga.widgets.canvas.DrawingAction].
         """
+        self._warn_if_state()
         reset_transform = ResetTransform()
         self._action_target.append(reset_transform)
         with warnings.catch_warnings():
@@ -476,6 +505,7 @@ class DrawingActionDispatch:
 
         :return: Yields the new [`State`][toga.widgets.canvas.State] object.
         """
+        self._warn_if_state()
         state = State()
         self._action_target.append(state)
         with warnings.catch_warnings():
@@ -492,7 +522,7 @@ class DrawingActionDispatch:
 
     def Context(self) -> ContextManager[State]:
         warnings.warn(
-            "The Context() drawing emthod has been renamed to state()",
+            "The Context() drawing method has been renamed to state()",
             DeprecationWarning,
             stacklevel=2,
         )

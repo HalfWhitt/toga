@@ -210,7 +210,7 @@ def test_deprecated_attribute_names(widget):
 
     # Create one sub-state first, to make sure we generate the new one in the right
     # place — on the root state.
-    with widget.root_state.state() as state_1:
+    with widget.state() as state_1:
         with pytest.warns(DeprecationWarning):
             with widget.Context() as state_2:
                 pass
@@ -221,7 +221,7 @@ def test_deprecated_attribute_names(widget):
 
     # Create one sub-state first, to make sure we generate the new one in the right
     # place — on the root state.
-    with widget.root_state.state() as state_3:
+    with widget.state() as state_3:
         with pytest.warns(DeprecationWarning):
             with widget.root_state.Context() as state_4:
                 pass

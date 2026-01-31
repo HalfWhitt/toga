@@ -506,10 +506,7 @@ class DrawingActionDispatch:
         y: float | None = None,
     ) -> ContextManager(ClosePath):
         warnings.warn(
-            (
-                "The ClosedPath() drawing method has been renamed to close_path(). Its "
-                "parameters (x and y) are also now keyword-only."
-            ),
+            "The ClosedPath() drawing method has been renamed to close_path()",
             DeprecationWarning,
             stacklevel=2,
         )
@@ -525,17 +522,13 @@ class DrawingActionDispatch:
         fill_rule: FillRule = FillRule.NONZERO,
     ) -> ContextManager[Fill]:
         warnings.warn(
-            (
-                "The Fill() drawing method has been renamed to close_fill(). It now "
-                "accepts fill_rule as its only positional parameter; color, x, and y "
-                "are now keyword-only."
-            ),
+            "The Fill() drawing method has been renamed to fill()",
             DeprecationWarning,
             stacklevel=2,
         )
         target = self if isinstance(self, State) else self.root_state
 
-        return target.close_path(fill_rule=fill_rule, color=color, x=x, y=y)
+        return target.fill(fill_rule=fill_rule, color=color, x=x, y=y)
 
     def Stroke(
         self,
@@ -546,17 +539,13 @@ class DrawingActionDispatch:
         line_dash: list[float] | None = None,
     ) -> ContextManager[Stroke]:
         warnings.warn(
-            (
-                "The Stroke() drawing method has been renamed to stroke(). Its "
-                "parameters (color, line_width, line_dash, x, and y) are also now "
-                "keyword-only."
-            ),
+            "The Stroke() drawing method has been renamed to stroke()",
             DeprecationWarning,
             stacklevel=2,
         )
         target = self if isinstance(self, State) else self.root_state
 
-        return target.close_path(
+        return target.stroke(
             color=color,
             line_width=line_width,
             line_dash=line_dash,

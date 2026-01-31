@@ -24,8 +24,8 @@ from toga.fonts import BOLD
 from toga.images import Image as TogaImage
 from toga.style.pack import SYSTEM, Pack
 
-from .conftest import build_cleanup_test
-from .properties import (  # noqa: F401
+from ..conftest import build_cleanup_test
+from ..properties import (  # noqa: F401
     test_background_color,
     test_background_color_reset,
     test_background_color_transparent,

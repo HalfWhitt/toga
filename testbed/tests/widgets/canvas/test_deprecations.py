@@ -13,8 +13,12 @@ from .test_canvas import (
 
 async def test_old_tutorial(canvas, probe):
     """The previous code in tutorial 4 still renders correctly."""
+
+    # Shift the whole thing up a bit so we can see all of it.
+    canvas.translate(0, -20)
+
     with pytest.warns(DeprecationWarning):
-        # Head
+        # Fill head
 
         with canvas.Fill(color=rgb(149, 119, 73)) as head_filler:
             head_filler.move_to(112, 103)
@@ -23,14 +27,6 @@ async def test_old_tutorial(canvas, probe):
             head_filler.line_to(35, 84)
             head_filler.arc(65, 84, 30, math.pi, 3 * math.pi / 2)
             head_filler.arc(82, 84, 30, 3 * math.pi / 2, 2 * math.pi)
-
-        with canvas.Stroke(line_width=4.0) as head_outline:
-            with head_outline.ClosedPath(112, 103) as closed_head:
-                closed_head.line_to(112, 113)
-                closed_head.ellipse(73, 114, 39, 47, 0, 0, math.pi)
-                closed_head.line_to(35, 84)
-                closed_head.arc(65, 84, 30, math.pi, 3 * math.pi / 2)
-                closed_head.arc(82, 84, 30, 3 * math.pi / 2, 2 * math.pi)
 
         # Eyes
 
@@ -82,6 +78,16 @@ async def test_old_tutorial(canvas, probe):
         with canvas.Stroke(line_width=4.0) as nose_stroker:
             nose_stroker.move_to(45, 145)
             nose_stroker.bezier_curve_to(51, 123, 96, 123, 102, 145)
+
+        # Outline head
+
+        with canvas.Stroke(line_width=4.0) as head_outline:
+            with head_outline.ClosedPath(112, 103) as closed_head:
+                closed_head.line_to(112, 113)
+                closed_head.ellipse(73, 114, 39, 47, 0, 0, math.pi)
+                closed_head.line_to(35, 84)
+                closed_head.arc(65, 84, 30, math.pi, 3 * math.pi / 2)
+                closed_head.arc(82, 84, 30, 3 * math.pi / 2, 2 * math.pi)
 
         # Text
 

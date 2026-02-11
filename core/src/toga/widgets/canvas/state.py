@@ -317,7 +317,7 @@ class DrawingActionDispatch(ABC):
         [Even-Odd](https://en.wikipedia.org/wiki/Even-odd_rule) winding
         rule for filling paths.
 
-        If used a context manager, this begins a new path, moves to the specified
+        If used as a context manager, this begins a new path, and moves to the specified
         (`x`, `y`) coordinates (if both are specified). When the context is exited, the
         path is filled.
 
@@ -346,7 +346,7 @@ class DrawingActionDispatch(ABC):
     ) -> Stroke:
         """Draw the current path as a stroke.
 
-        If used a context manager, this begins a new path, moves to the specified
+        If used as a context manager, this begins a new path, and moves to the specified
         (`x`, `y`) coordinates (if both are specified). When the context is exited, the
         path is stroked.
 

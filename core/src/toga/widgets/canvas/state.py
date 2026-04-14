@@ -24,9 +24,15 @@ from .drawingaction import (
     QuadraticCurveTo,
     Rect,
     ResetTransform,
+    Restore,
     Rotate,
     RoundRect,
+    Save,
     Scale,
+    SetFillStyle,
+    SetLineDash,
+    SetLineWidth,
+    SetStrokeStyle,
     Translate,
     WriteText,
     color_property,
@@ -41,6 +47,25 @@ if TYPE_CHECKING:
 
 # Make sure deprecation warnings are shown by default
 warnings.filterwarnings("default", category=DeprecationWarning)
+
+
+class set_only_property:
+    def __init__(self, ActionClass):
+        self.ActionClass = ActionClass
+
+    def __get__(self, dispatch, dispatch_class=None):
+        raise NotImplementedError(
+            "Canvas context attributes can only be set, not accessed."
+        )
+
+    def __set__(self, dispatch, value):
+        dispatch._add_to_target(self.ActionClass(value))
+
+    def __del__(self, dispatch, dispatch_class=None):
+        raise NotImplementedError(
+            "Canvas context attributes can't be deleted. To reset to a default or "
+            "previous value, do so explicitly or reset to a previous context state."
+        )
 
 
 class DrawingActionDispatch(ABC):
@@ -58,6 +83,49 @@ class DrawingActionDispatch(ABC):
                 last._can_be_entered = False
 
         actions.append(drawing_action)
+
+    ###########################################################################
+    # State management
+    ###########################################################################
+
+    # These didn't exist in the previous API, so they don't need a compatibility shim.
+
+    def save(self) -> Save:
+        """Save the current state of the drawing context.
+
+        :returns: The `Save`
+            [`DrawingAction`][toga.widgets.canvas.DrawingAction] for the operation.
+        """
+        save = Save()
+        self._add_to_target(save)
+        # No need to redraw, since this has no visual effect.
+        return save
+
+    def restore(self) -> Save:
+        """Restore to the previous state of the drawing context.
+
+        :returns: The `Restore`
+            [`DrawingAction`][toga.widgets.canvas.DrawingAction] for the operation.
+        """
+        restore = Restore()
+        self._add_to_target(restore)
+        # No need to redraw, since this has no visual effect.
+        return restore
+
+    ###########################################################################
+    # Attribute setting
+    ###########################################################################
+
+    fill_style: ColorT = set_only_property(SetFillStyle)
+    """The fill color."""
+    stroke_style: ColorT = set_only_property(SetStrokeStyle)
+    """The stroke color."""
+    line_width: float = set_only_property(SetLineWidth)
+    """The width of the stroke."""
+    line_dash: list[float] = set_only_property(SetLineDash)
+    """The dash pattern to follow when drawing the line, expressed as alternating
+    lengths of dashes and spaces. The default is a solid line.
+    """
 
     ###########################################################################
     # Path manipulation

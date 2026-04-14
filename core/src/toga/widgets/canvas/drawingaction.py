@@ -20,6 +20,7 @@ from toga.images import Image
 from .geometry import CornerRadiusT
 
 if TYPE_CHECKING:
+    from toga.colors import ColorT
     from toga.constants import Baseline
 
 # Make sure deprecation warnings are shown by default
@@ -135,6 +136,63 @@ class color_property:
             value = Color.parse(value)
 
         action._color = value
+
+
+###########################################################################
+# State management
+###########################################################################
+
+
+class Save(DrawingAction):
+    def _draw(self, context: Any) -> None:
+        context.save()
+
+
+class Restore(DrawingAction):
+    def _draw(self, context: Any) -> None:
+        context.restore()
+
+
+###########################################################################
+# Attribute setting
+###########################################################################
+
+
+@dataclass(repr=False)
+class SetFillStyle(DrawingAction):
+    fill_style: ColorT = color_property()
+
+    def _draw(self, context: Any) -> None:
+        context.set_fill_style(self.fill_style)
+
+
+@dataclass(repr=False)
+class SetStrokeStyle(DrawingAction):
+    stroke_style: ColorT = color_property()
+
+    def _draw(self, context: Any) -> None:
+        context.set_stroke_style(self.stroke_style)
+
+
+@dataclass(repr=False)
+class SetLineDash(DrawingAction):
+    line_dash: list[float]
+
+    def _draw(self, context: Any) -> None:
+        context.set_line_dash(self.line_dash)
+
+
+@dataclass(repr=False)
+class SetLineWidth(DrawingAction):
+    line_width: float
+
+    def _draw(self, context: Any) -> None:
+        context.set_line_width(self.line_width)
+
+
+###########################################################################
+# Path manipulation
+###########################################################################
 
 
 class BeginPath(DrawingAction):
@@ -282,6 +340,11 @@ class RoundRect(DrawingAction):
         context.round_rect(self.x, self.y, self.width, self.height, self.radii)
 
 
+###########################################################################
+# Text drawing
+###########################################################################
+
+
 @dataclass(repr=False)
 class WriteText(DrawingAction):
     text: str
@@ -306,6 +369,11 @@ class WriteText(DrawingAction):
         )
 
 
+###########################################################################
+# Bitmap drawing
+###########################################################################
+
+
 @dataclass(repr=False)
 class DrawImage(DrawingAction):
     image: Image
@@ -322,6 +390,11 @@ class DrawImage(DrawingAction):
             self.width if self.width is not None else self.image.width,
             self.height if self.height is not None else self.image.height,
         )
+
+
+###########################################################################
+# Transformations
+###########################################################################
 
 
 @dataclass(repr=False)

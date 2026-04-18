@@ -1,13 +1,14 @@
 import pytest
 
 import toga
-from toga.colors import rgb
+from toga.colors import BLACK, REBECCAPURPLE, Color
 from toga.constants import FillRule
 from toga.fonts import SYSTEM, SYSTEM_DEFAULT_FONT_SIZE, Font
 from toga.widgets.canvas import ClosePath, Fill, State, Stroke
 from toga_dummy.utils import assert_action_not_performed, assert_action_performed
 
-REBECCA_PURPLE_COLOR = rgb(102, 51, 153)
+REBECCA_PURPLE_COLOR = Color.parse(REBECCAPURPLE)
+BLACK_COLOR = Color.parse(BLACK)
 
 
 def test_widget_created():
@@ -173,3 +174,42 @@ def test_as_image(widget):
     image = widget.as_image()
     assert image is not None
     assert_action_performed(widget, "get image data")
+
+
+BLACK_COLOR = Color.parse(BLACK)
+
+
+@pytest.mark.parametrize(
+    "name, default, value_assign, value_check",
+    [
+        ("fill_style", BLACK_COLOR, REBECCAPURPLE, REBECCA_PURPLE_COLOR),
+        ("stroke_style", BLACK_COLOR, REBECCAPURPLE, REBECCA_PURPLE_COLOR),
+        ("line_width", 2.0, 5, 5.0),
+        ("line_dash", [1.0], [1, 2], [1.0, 2.0]),
+    ],
+)
+def test_attributes_save_restore(widget, name, default, value_assign, value_check):
+    """Context attributes can be set, accessed, and restored, but not deleted."""
+    assert getattr(widget, name) == default
+
+    widget.save()
+    setattr(widget, name, value_assign)
+    assert getattr(widget, name) == value_check
+    widget.restore()
+
+    assert getattr(widget, name) == default
+
+    with widget.state():
+        setattr(widget, name, value_assign)
+        assert getattr(widget, name) == value_check
+
+    assert getattr(widget, name) == default
+
+    with pytest.raises(
+        NotImplementedError,
+        match=(
+            r"Drawing context attributes can't be deleted\. To reset to a default or "
+            r"previous value, do so explicitly or reset to a previous context state\."
+        ),
+    ):
+        delattr(widget, name)

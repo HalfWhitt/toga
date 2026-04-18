@@ -1076,7 +1076,7 @@ async def test_attributes(canvas, probe, restore_method):
             canvas.fill_style = RED
             canvas.stroke_style = CORNFLOWERBLUE
             canvas.line_width = 3
-            canvas.line_dash = [1, 4]
+            canvas.line_dash = []
 
             # 4. Blue on red
             draw_rect(canvas)
@@ -1088,7 +1088,7 @@ async def test_attributes(canvas, probe, restore_method):
             canvas.fill_style = CORNFLOWERBLUE
             canvas.stroke_style = BLACK
             canvas.line_width = 5
-            canvas.line_dash = [1]
+            canvas.line_dash = [1, 4]
 
             # 6. Black on blue
             draw_rect(canvas)

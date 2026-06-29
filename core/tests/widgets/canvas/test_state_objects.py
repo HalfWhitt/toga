@@ -11,7 +11,7 @@ from toga.widgets.canvas import (
     Stroke,
     Translate,
 )
-from toga_dummy.utils import assert_action_performed
+from toga_dummy.utils import assert_action_not_performed, assert_action_performed
 
 REBECCA_PURPLE_COLOR = rgb(102, 51, 153)
 BLACK_COLOR = rgb(0, 0, 0)
@@ -34,6 +34,33 @@ def test_sub_state(widget):
         "save",
         ("line to", {"x": 30, "y": 40}),
         "restore",
+    ]
+
+
+def test_restore_upon_exit(widget):
+    """When a state exits, it restores any un-restored saves."""
+    with widget.state():
+        widget.save()
+        widget.restore()
+        widget.save()
+        widget.save()
+
+    # Doesn't automatically redraw, since it can't have any visual effect.
+    assert_action_not_performed(widget, "redraw")
+    # Redraw has to be called in order for the dummy back end to get the instruction.
+    widget.redraw()
+    assert_action_performed(widget, "redraw")
+
+    # The first and last instructions save/restore the root state, and can be ignored.
+    assert widget._impl.draw_instructions[1:-1] == [
+        "save",  # Enter state()
+        "save",
+        "restore",
+        "save",
+        "save",
+        "restore",  # auto-added
+        "restore",  # autod-added
+        "restore",  # Leave state()
     ]
 
 

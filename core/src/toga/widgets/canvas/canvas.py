@@ -28,7 +28,7 @@ from .drawingaction import (
     SetLineWidth,
     SetStrokeStyle,
 )
-from .state import BaseState, DrawingActionDispatch, State
+from .state import BaseState, DrawingActionDispatch, State, _num_saves
 
 if TYPE_CHECKING:
     from toga.images import ColorT, ImageT
@@ -236,11 +236,7 @@ class Canvas(Widget, DrawingActionDispatch):
             [`DrawingAction`][toga.widgets.canvas.DrawingAction] for the operation, or
             `None` if there's no save to restore from.
         """
-        num_saves = sum(
-            1 if isinstance(action, Save) else -1 if isinstance(action, Restore) else 0
-            for action in self._action_target.drawing_actions
-        )
-        if num_saves > 0:
+        if _num_saves(self._action_target.drawing_actions) > 0:
             restore = Restore()
             self._add_to_target(restore)
             # No need to redraw, since this has no visual effect.

@@ -26,7 +26,9 @@ from .drawingaction import (
     QuadraticCurveTo,
     Rect,
     ResetTransform,
+    Restore,
     RoundRect,
+    Save,
     StrokeText,
     WriteText,
     color_property,
@@ -779,6 +781,13 @@ class DrawingActionDispatch(ABC):
     ######################################################################
 
 
+def _num_saves(actions):
+    return sum(
+        1 if isinstance(action, Save) else -1 if isinstance(action, Restore) else 0
+        for action in actions
+    )
+
+
 class BaseState(DrawingAction, DrawingActionDispatch, ABC):
     """A base class for all drawing actions that can function as state-saving context
     managers.
@@ -828,6 +837,10 @@ class BaseState(DrawingAction, DrawingActionDispatch, ABC):
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        # Balance out any un-restored saves.
+        for _ in range(_num_saves(self.drawing_actions)):
+            self.drawing_actions.append(Restore())
+
         self._is_open = False
         # Don't suppress any exceptions
         return False

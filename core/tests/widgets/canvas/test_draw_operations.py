@@ -1,3 +1,4 @@
+from contextlib import nullcontext
 from pathlib import Path
 
 import pytest
@@ -29,9 +30,48 @@ def test_save(widget):
     assert widget._impl.draw_instructions[1:-1] == ["save"]
 
 
-def test_restore(widget):
-    """A restore operation can be added."""
-    draw_op = widget.restore()
+@pytest.mark.parametrize(
+    "use_substate, actions",
+    [
+        (True, ["save", "restore"]),
+        (False, []),
+    ],
+)
+def test_restore_without_save(widget, use_substate, actions):
+    """A restore operation can't be added without a preceding save."""
+    context = widget.state() if use_substate else nullcontext()
+
+    with pytest.warns(RuntimeWarning):
+        with context:
+            draw_op = widget.restore()
+
+    # Doesn't automatically redraw, whether the action is added or not.
+    assert_action_not_performed(widget, "redraw")
+    # Redraw has to be called in order for the dummy back end to get the instruction.
+    widget.redraw()
+    assert_action_performed(widget, "redraw")
+
+    # There was no save beforehand, so no Restore was added.
+    assert draw_op is None
+
+    # The first and last instructions save/restore the root state, and can be ignored.
+    assert widget._impl.draw_instructions[1:-1] == actions
+
+
+@pytest.mark.parametrize(
+    "use_substate, actions",
+    [
+        (True, ["save", "save", "restore", "restore"]),
+        (False, ["save", "restore"]),
+    ],
+)
+def test_restore_after_save(widget, use_substate, actions):
+    """A restore operation can be added, as long as there's a preceding save."""
+    context = widget.state() if use_substate else nullcontext()
+
+    with context:
+        widget.save()
+        draw_op = widget.restore()
 
     # Doesn't automatically redraw, since it can't have any visual effect.
     assert_action_not_performed(widget, "redraw")
@@ -41,7 +81,7 @@ def test_restore(widget):
     assert repr(draw_op) == "Restore()"
 
     # The first and last instructions save/restore the root state, and can be ignored.
-    assert widget._impl.draw_instructions[1:-1] == ["restore"]
+    assert widget._impl.draw_instructions[1:-1] == actions
 
 
 def test_begin_path(widget):

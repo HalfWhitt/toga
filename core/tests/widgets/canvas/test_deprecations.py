@@ -125,7 +125,8 @@ def test_state_drawing_methods(app, widget, method_name, args, DrawingActionClas
 
     assert state.drawing_actions == [drawing_action]
     assert isinstance(drawing_action, DrawingActionClass)
-    assert_action_performed(widget, "redraw")
+    if DrawingActionClass is not State:
+        assert_action_performed(widget, "redraw")
 
 
 def test_canvas_context_method(widget):
@@ -491,15 +492,15 @@ def test_unattached_state(widget):
 
 
 @pytest.mark.parametrize(
-    "method_name, DrawingActionClass",
+    "method_name, DrawingActionClass, redraw",
     [
-        ("ClosedPath", ClosePath),
-        ("Fill", Fill),
-        ("Stroke", Stroke),
-        ("Context", State),
+        ("ClosedPath", ClosePath, True),
+        ("Fill", Fill, True),
+        ("Stroke", Stroke, True),
+        ("Context", State, False),
     ],
 )
-def test_deprecated_canvas_methods(widget, method_name, DrawingActionClass):
+def test_deprecated_canvas_methods(widget, method_name, DrawingActionClass, redraw):
     """The Canvas CamelCase methods are deprecated, and add to root state."""
     with widget.state() as state:
         # Test within an open sub-state, to verify it adds to root state.
@@ -508,7 +509,8 @@ def test_deprecated_canvas_methods(widget, method_name, DrawingActionClass):
 
     assert widget.root_state.drawing_actions == [state, drawing_action]
     assert isinstance(drawing_action, DrawingActionClass)
-    assert_action_performed(widget, "redraw")
+    if redraw:
+        assert_action_performed(widget, "redraw")
 
 
 # Use the same set of inputs as the "actual" fill_text and stroke_text test.

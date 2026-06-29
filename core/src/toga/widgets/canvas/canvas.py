@@ -224,16 +224,35 @@ class Canvas(Widget, DrawingActionDispatch):
         # No need to redraw, since this has no visual effect.
         return save
 
-    def restore(self) -> Save:
+    def restore(self) -> Restore | None:
         """Restore to the previous state of the drawing context.
 
+        If this is called, and there's not at least one un-restored save at the current
+        indentation level (that is, within a context manager or at the "top level"),
+        the canvas will do nothing. A warning will be issued, to alert you to the fact
+        that you may not be doing what you intend.
+
         :returns: The `Restore`
-            [`DrawingAction`][toga.widgets.canvas.DrawingAction] for the operation.
+            [`DrawingAction`][toga.widgets.canvas.DrawingAction] for the operation, or
+            `None` if there's no save to restore from.
         """
-        restore = Restore()
-        self._add_to_target(restore)
-        # No need to redraw, since this has no visual effect.
-        return restore
+        num_saves = sum(
+            1 if isinstance(action, Save) else -1 if isinstance(action, Restore) else 0
+            for action in self._action_target.drawing_actions
+        )
+        if num_saves > 0:
+            restore = Restore()
+            self._add_to_target(restore)
+            # No need to redraw, since this has no visual effect.
+            return restore
+
+        else:
+            warnings.warn(
+                "Canvas: Attempted restore() without preceding save().",
+                RuntimeWarning,
+                stacklevel=2,
+            )
+            return None
 
     fill_style: ColorT = drawing_context_property(SetFillStyle, BLACK_COLOR)
     """The current fill color."""

@@ -594,7 +594,7 @@ class DrawingActionDispatch(ABC):
             line_dash=line_dash,
         )
         self._add_to_target(state)
-        self._redraw_with_warning_if_state()
+        self._redraw_with_warning_if_state(redraw=False)
         return state
 
     ######################################################################
@@ -754,7 +754,7 @@ class DrawingActionDispatch(ABC):
             warnings.simplefilter("ignore", DeprecationWarning)
             self.redraw()
 
-    def _redraw_with_warning_if_state(self):
+    def _redraw_with_warning_if_state(self, redraw=True):
         if isinstance(self, BaseState):
             # If a drawing method is called on a state, we need to warn about that, but
             # then silence the additional warning that we'll cause when we internally
@@ -767,10 +767,12 @@ class DrawingActionDispatch(ABC):
                 DeprecationWarning,
                 stacklevel=3,
             )
-            self._redraw_without_warning()
+            if redraw:
+                self._redraw_without_warning()
         else:
             # On a canvas, proceed as usual.
-            self.redraw()
+            if redraw:
+                self.redraw()
 
     ######################################################################
     # End Backwards compatibility
